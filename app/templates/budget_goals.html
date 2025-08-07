@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+
+{% block title %}Budget Goals - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <div>
+                    <h2 class="h3 mb-1">
+                        <i class="fas fa-bullseye me-2 text-primary" aria-hidden="true"></i>Budget Goals
+                    </h2>
+                    <p class="text-muted mb-0">Set and track your spending limits</p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                        <i class="fas fa-plus me-1"></i>Add Goal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-12 col-md-3">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <h4 class="mb-0">{{ goals|length }}</h4>
+                    <small>Total Goals</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    {% set on_track = 0 %}
+                    {% for goal in goals %}
+                        {% if goal.progress_percentage() <= 80 %}
+                            {% set on_track = on_track + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    <h4 class="mb-0">{{ on_track }}</h4>
+                    <small>On Track</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="card text-center bg-warning text-white">
+                <div class="card-body">
+                    {% set at_risk = 0 %}
+                    {% for goal in goals %}
+                        {% set progress = goal.progress_percentage() %}
+                        {% if progress > 80 and progress <= 100 %}
+                            {% set at_risk = at_risk + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    <h4 class="mb-0">{{ at_risk }}</h4>
+                    <small>At Risk</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="card text-center bg-danger text-white">
+                <div class="card-body">
+                    {% set over_budget = goals|selectattr('is_over_budget')|list|length %}
+                    <h4 class="mb-0">{{ over_budget }}</h4>
+                    <small>Over Budget</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals List -->
+    <div class="row">
+        {% if goals %}
+            {% for goal in goals %}
+            <div class="col-12 col-lg-6 mb-4">
+                <div class="card h-100 {{ 'border-danger' if goal.is_over_budget() else 'border-warning' if goal.progress_percentage() > 80 else '' }}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <span class="badge me-2" style="background-color: {{ goal.category.color }}">
+                                {{ goal.category.name }}
+                            </span>
+                            <small class="text-muted">{{ goal.period.title() }}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ goal.days_remaining() }} days left</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">${{ "%.2f"|format(goal.current_spent) }}</h5>
+                            <span class="text-muted">of ${{ "%.2f"|format(goal.target_amount) }}</span>
+                        </div>
+                        
+                        <div class="progress mb-3" style="height: 20px;">
+                            {% set progress = goal.progress_percentage() %}
+                            <div class="progress-bar {{ 'bg-danger' if progress > 100 else 'bg-warning' if progress > 80 else 'bg-success' }}" 
+                                 role="progressbar" 
+                                 style="width: {{ min(100, progress) }}%"
+                                 aria-valuenow="{{ progress }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ "%.1f"|format(progress) }}%
+                            </div>
+                        </div>
+                        
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h6 class="mb-0 {{ 'text-success' if goal.remaining_amount() > 0 else 'text-danger' }}">
+                                        ${{ "%.2f"|format(abs(goal.remaining_amount())) }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        {{ 'Remaining' if goal.remaining_amount() > 0 else 'Over Budget' }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="mb-0">{{ "%.1f"|format(goal.progress_percentage()) }}%</h6>
+                                <small class="text-muted">Used</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if goal.is_over_budget() %}
+                    <div class="card-footer bg-danger text-white text-center">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <strong>Over Budget!</strong> Consider adjusting spending in this category.
+                    </div>
+                    {% elif goal.progress_percentage() > 80 %}
+                    <div class="card-footer bg-warning text-white text-center">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <strong>Warning:</strong> Approaching budget limit.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-bullseye fa-3x text-muted mb-3"></i>
+                        <h5>No Budget Goals Yet</h5>
+                        <p class="text-muted">Set your first budget goal to start tracking your spending limits!</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                            <i class="fas fa-plus me-1"></i>Create First Goal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Goal Modal -->
+<div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addGoalModalLabel">
+                    <i class="fas fa-bullseye me-2"></i>Create Budget Goal
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('main.add_budget_goal') }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select class="form-select" id="category_id" name="category_id" required>
+                            <option value="">Select category...</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="target_amount" class="form-label">Budget Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="target_amount" name="target_amount" 
+                                   step="0.01" min="0" required placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="period" class="form-label">Period</label>
+                        <select class="form-select" id="period" name="period" required>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Tip:</strong> Set realistic budget goals based on your spending history. 
+                        You'll receive notifications when you're approaching your limits.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i>Create Goal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Real-time progress updates
+function updateGoalProgress() {
+    // This would typically fetch real-time data from the server
+    console.log('Updating goal progress...');
+}
+
+// Auto-refresh every 5 minutes
+setInterval(updateGoalProgress, 300000);
+
+// Form validation
+document.getElementById('addGoalModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById('category_id').focus();
+});
+</script>
+{% endblock %}

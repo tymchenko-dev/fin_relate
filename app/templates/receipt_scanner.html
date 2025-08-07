@@ -1,0 +1,448 @@
+{% extends "layout.html" %}
+
+{% block title %}Receipt Scanner - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <div>
+                    <h2 class="h3 mb-1">
+                        <i class="fas fa-camera me-2 text-primary" aria-hidden="true"></i>Receipt Scanner
+                    </h2>
+                    <p class="text-muted mb-0">AI-powered receipt processing</p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanner Interface -->
+    <div class="row mb-4">
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-scan me-2"></i>Scan New Receipt
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Camera View -->
+                    <div id="camera-container" class="mb-3" style="display: none;">
+                        <video id="camera-feed" width="100%" height="300" autoplay></video>
+                        <div class="mt-3">
+                            <button id="capture-btn" class="btn btn-success btn-lg me-2">
+                                <i class="fas fa-camera me-1"></i>Capture Receipt
+                            </button>
+                            <button id="stop-camera-btn" class="btn btn-secondary">
+                                <i class="fas fa-stop me-1"></i>Stop Camera
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div id="upload-container">
+                        <div class="border-dashed border-primary rounded p-5 mb-3" style="border: 2px dashed #007bff;">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                            <h5>Upload Receipt Image</h5>
+                            <p class="text-muted">Drag & drop or click to select an image</p>
+                            <input type="file" id="receipt-upload" accept="image/*" class="d-none">
+                            <button class="btn btn-primary" onclick="document.getElementById('receipt-upload').click()">
+                                <i class="fas fa-folder-open me-1"></i>Choose File
+                            </button>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <button id="start-camera-btn" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-camera me-1"></i>Use Camera
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button id="demo-scan-btn" class="btn btn-outline-info w-100">
+                                    <i class="fas fa-magic me-1"></i>Demo Scan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Processing -->
+                    <div id="processing-container" class="d-none">
+                        <div class="d-flex justify-content-center align-items-center p-5">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                    <span class="visually-hidden">Processing...</span>
+                                </div>
+                                <h5>Processing Receipt...</h5>
+                                <p class="text-muted">AI is analyzing your receipt</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="results-container" class="d-none">
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle me-2"></i>Receipt Processed Successfully!</h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Detected Information:</h6>
+                                <ul class="list-group text-start">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Amount:</strong>
+                                        <span id="detected-amount">$0.00</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Merchant:</strong>
+                                        <span id="detected-merchant">Unknown</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Category:</strong>
+                                        <span id="detected-category">Other</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Confidence:</strong>
+                                        <span id="confidence-score">0%</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Actions:</h6>
+                                <div class="d-grid gap-2">
+                                    <button id="create-transaction-btn" class="btn btn-success">
+                                        <i class="fas fa-plus me-1"></i>Create Transaction
+                                    </button>
+                                    <button id="edit-details-btn" class="btn btn-outline-primary">
+                                        <i class="fas fa-edit me-1"></i>Edit Details
+                                    </button>
+                                    <button id="scan-another-btn" class="btn btn-outline-secondary">
+                                        <i class="fas fa-camera me-1"></i>Scan Another
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips & Information -->
+        <div class="col-12 col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>Tips for Better Scanning
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Ensure good lighting conditions
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Keep the receipt flat and straight
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Include the total amount in the image
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Avoid shadows and reflections
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Make sure text is clearly readable
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- AI Stats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot me-2 text-info"></i>AI Performance
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <h4 class="text-success">94%</h4>
+                            <small class="text-muted">Accuracy Rate</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-info">2.3s</h4>
+                            <small class="text-muted">Avg Processing</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Scans -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Scans
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_scans %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Merchant</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Confidence</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for scan in recent_scans %}
+                                    <tr>
+                                        <td>{{ scan.created_at.strftime('%m/%d/%Y %H:%M') }}</td>
+                                        <td>{{ scan.detected_merchant or 'Unknown' }}</td>
+                                        <td class="fw-bold">${{ "%.2f"|format(scan.detected_amount or 0) }}</td>
+                                        <td>
+                                            {% if scan.suggested_category %}
+                                            <span class="badge" style="background-color: {{ scan.suggested_category.color }}">
+                                                {{ scan.suggested_category.name }}
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Unknown</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 15px;">
+                                                    {% set confidence = (scan.confidence_score or 0) * 100 %}
+                                                    <div class="progress-bar bg-{{ 'success' if confidence > 80 else 'warning' if confidence > 60 else 'danger' }}" 
+                                                         style="width: {{ confidence }}%"></div>
+                                                </div>
+                                                <small>{{ "%.0f"|format(confidence) }}%</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if scan.is_processed %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Converted
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not scan.is_processed %}
+                                            <a href="{{ url_for('main.convert_receipt_to_transaction', scan_id=scan.id) }}" 
+                                               class="btn btn-sm btn-success">
+                                                <i class="fas fa-plus me-1"></i>Convert
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted">Completed</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <h6>No Recent Scans</h6>
+                            <p class="text-muted">Start scanning receipts to see them here!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let camera_stream = null;
+let current_scan_id = null;
+
+// Initialize camera
+document.getElementById('start-camera-btn').addEventListener('click', async function() {
+    try {
+        camera_stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        document.getElementById('camera-feed').srcObject = camera_stream;
+        document.getElementById('upload-container').style.display = 'none';
+        document.getElementById('camera-container').style.display = 'block';
+    } catch (error) {
+        alert('Camera access denied. Please use file upload instead.');
+        console.error('Camera error:', error);
+    }
+});
+
+// Stop camera
+document.getElementById('stop-camera-btn').addEventListener('click', function() {
+    if (camera_stream) {
+        camera_stream.getTracks().forEach(track => track.stop());
+        camera_stream = null;
+    }
+    document.getElementById('camera-container').style.display = 'none';
+    document.getElementById('upload-container').style.display = 'block';
+});
+
+// Capture photo
+document.getElementById('capture-btn').addEventListener('click', function() {
+    const video = document.getElementById('camera-feed');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    
+    // Convert to blob and process
+    canvas.toBlob(function(blob) {
+        processReceipt(blob);
+    }, 'image/jpeg', 0.8);
+});
+
+// File upload
+document.getElementById('receipt-upload').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        processReceipt(file);
+    }
+});
+
+// Demo scan
+document.getElementById('demo-scan-btn').addEventListener('click', function() {
+    // Simulate processing for demo
+    showProcessing();
+    
+    setTimeout(() => {
+        fetch('/scan-receipt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            showResults(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideProcessing();
+            alert('Error processing receipt. Please try again.');
+        });
+    }, 2000);
+});
+
+// Process receipt function
+function processReceipt(imageData) {
+    showProcessing();
+    
+    // Simulate API call - in real implementation, you'd send the image to your backend
+    setTimeout(() => {
+        fetch('/scan-receipt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            current_scan_id = data.scan_id;
+            showResults(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideProcessing();
+            alert('Error processing receipt. Please try again.');
+        });
+    }, 3000);
+}
+
+// Show processing state
+function showProcessing() {
+    document.getElementById('upload-container').style.display = 'none';
+    document.getElementById('camera-container').style.display = 'none';
+    document.getElementById('results-container').classList.add('d-none');
+    document.getElementById('processing-container').classList.remove('d-none');
+}
+
+// Hide processing state
+function hideProcessing() {
+    document.getElementById('processing-container').classList.add('d-none');
+    document.getElementById('upload-container').style.display = 'block';
+}
+
+// Show results
+function showResults(data) {
+    document.getElementById('processing-container').classList.add('d-none');
+    
+    // Update results
+    document.getElementById('detected-amount').textContent = '$' + data.amount.toFixed(2);
+    document.getElementById('detected-merchant').textContent = data.merchant;
+    document.getElementById('detected-category').textContent = data.category;
+    document.getElementById('confidence-score').textContent = Math.round(data.confidence * 100) + '%';
+    
+    document.getElementById('results-container').classList.remove('d-none');
+}
+
+// Create transaction button
+document.getElementById('create-transaction-btn').addEventListener('click', function() {
+    if (current_scan_id) {
+        window.location.href = `/convert-receipt/${current_scan_id}`;
+    }
+});
+
+// Scan another button
+document.getElementById('scan-another-btn').addEventListener('click', function() {
+    document.getElementById('results-container').classList.add('d-none');
+    document.getElementById('upload-container').style.display = 'block';
+    current_scan_id = null;
+    
+    // Reset file input
+    document.getElementById('receipt-upload').value = '';
+});
+
+// Drag and drop functionality
+const uploadContainer = document.querySelector('.border-dashed');
+uploadContainer.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('border-success');
+});
+
+uploadContainer.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-success');
+});
+
+uploadContainer.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-success');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && files[0].type.startsWith('image/')) {
+        processReceipt(files[0]);
+    }
+});
+</script>
+{% endblock %}

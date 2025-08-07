@@ -1,0 +1,433 @@
+{% extends "layout.html" %}
+
+{% block title %}Custom Dashboard - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <div>
+                    <h2 class="h3 mb-1">
+                        <i class="fas fa-th-large me-2 text-primary" aria-hidden="true"></i>Custom Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">Personalized financial overview</p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-tachometer-alt me-1"></i>Standard Dashboard
+                    </a>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addWidgetModal">
+                        <i class="fas fa-plus me-1"></i>Add Widget
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div id="dashboard-grid" class="row g-3">
+        {% for widget in widgets %}
+        <div class="col-12 col-md-{{ widget.width }}" data-widget-id="{{ widget.id }}">
+            <div class="card widget-card h-100" data-widget-type="{{ widget.widget_type }}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-{{ 'wallet' if widget.widget_type == 'balance' else 'chart-pie' if widget.widget_type == 'spending_chart' else 'bullseye' if widget.widget_type == 'goals' else 'lightbulb' }} me-2"></i>
+                        {{ widget.title }}
+                    </h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="refreshWidget('{{ widget.widget_type }}', {{ widget.id }})">
+                                <i class="fas fa-sync me-2"></i>Refresh
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="editWidget({{ widget.id }})">
+                                <i class="fas fa-edit me-2"></i>Edit
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="removeWidget({{ widget.id }})">
+                                <i class="fas fa-trash me-2"></i>Remove
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body widget-content" id="widget-{{ widget.id }}">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading widget data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not widgets %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-th-large fa-3x text-muted mb-3"></i>
+                    <h5>No Widgets Yet</h5>
+                    <p class="text-muted">Add your first widget to create a personalized dashboard!</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addWidgetModal">
+                        <i class="fas fa-plus me-1"></i>Add Your First Widget
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Widget Modal -->
+<div class="modal fade" id="addWidgetModal" tabindex="-1" aria-labelledby="addWidgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addWidgetModalLabel">
+                    <i class="fas fa-plus me-2"></i>Add New Widget
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <div class="card widget-option" data-widget-type="balance" onclick="selectWidgetType('balance')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-wallet fa-2x text-success mb-2"></i>
+                                <h6>Balance</h6>
+                                <small class="text-muted">Current account balance</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="card widget-option" data-widget-type="spending_chart" onclick="selectWidgetType('spending_chart')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-pie fa-2x text-primary mb-2"></i>
+                                <h6>Spending Chart</h6>
+                                <small class="text-muted">Monthly spending breakdown</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="card widget-option" data-widget-type="goals" onclick="selectWidgetType('goals')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-bullseye fa-2x text-warning mb-2"></i>
+                                <h6>Budget Goals</h6>
+                                <small class="text-muted">Progress on budget goals</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="card widget-option" data-widget-type="recommendations" onclick="selectWidgetType('recommendations')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-lightbulb fa-2x text-info mb-2"></i>
+                                <h6>Smart Tips</h6>
+                                <small class="text-muted">AI recommendations</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="selected-widget-type" value="">
+                
+                <div id="widget-config" class="mt-3" style="display: none;">
+                    <hr>
+                    <div class="mb-3">
+                        <label for="widget-title" class="form-label">Widget Title</label>
+                        <input type="text" class="form-control" id="widget-title" placeholder="Enter custom title">
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="widget-width" class="form-label">Width (columns)</label>
+                            <select class="form-select" id="widget-width">
+                                <option value="3">3 columns</option>
+                                <option value="4" selected>4 columns</option>
+                                <option value="6">6 columns</option>
+                                <option value="12">12 columns (full width)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="widget-height" class="form-label">Height (rows)</label>
+                            <select class="form-select" id="widget-height">
+                                <option value="2">2 rows</option>
+                                <option value="3" selected>3 rows</option>
+                                <option value="4">4 rows</option>
+                                <option value="5">5 rows</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="add-widget-btn" disabled onclick="addWidget()">
+                    <i class="fas fa-plus me-1"></i>Add Widget
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedWidgetType = null;
+
+// Load all widgets on page load
+document.addEventListener('DOMContentLoaded', function() {
+    {% for widget in widgets %}
+    loadWidgetData('{{ widget.widget_type }}', {{ widget.id }});
+    {% endfor %}
+    
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        {% for widget in widgets %}
+        loadWidgetData('{{ widget.widget_type }}', {{ widget.id }});
+        {% endfor %}
+    }, 30000);
+});
+
+// Select widget type
+function selectWidgetType(type) {
+    selectedWidgetType = type;
+    document.getElementById('selected-widget-type').value = type;
+    
+    // Highlight selected option
+    document.querySelectorAll('.widget-option').forEach(option => {
+        option.classList.remove('border-primary');
+    });
+    document.querySelector(`[data-widget-type="${type}"]`).classList.add('border-primary');
+    
+    // Show configuration
+    document.getElementById('widget-config').style.display = 'block';
+    document.getElementById('add-widget-btn').disabled = false;
+    
+    // Set default title
+    const titles = {
+        'balance': 'Current Balance',
+        'spending_chart': 'Monthly Spending',
+        'goals': 'Budget Goals',
+        'recommendations': 'Smart Tips'
+    };
+    document.getElementById('widget-title').value = titles[type];
+}
+
+// Add widget
+function addWidget() {
+    const type = document.getElementById('selected-widget-type').value;
+    const title = document.getElementById('widget-title').value;
+    const width = document.getElementById('widget-width').value;
+    const height = document.getElementById('widget-height').value;
+    
+    // In a real implementation, you'd make an AJAX call to save the widget
+    console.log('Adding widget:', { type, title, width, height });
+    
+    // For demo, just reload the page
+    location.reload();
+}
+
+// Load widget data
+function loadWidgetData(widgetType, widgetId) {
+    fetch(`/widget-data/${widgetType}`)
+        .then(response => response.json())
+        .then(data => {
+            renderWidget(widgetType, widgetId, data);
+        })
+        .catch(error => {
+            console.error('Error loading widget data:', error);
+            document.getElementById(`widget-${widgetId}`).innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>Error loading widget</p>
+                </div>
+            `;
+        });
+}
+
+// Render widget based on type
+function renderWidget(type, widgetId, data) {
+    const container = document.getElementById(`widget-${widgetId}`);
+    
+    switch (type) {
+        case 'balance':
+            container.innerHTML = `
+                <div class="text-center">
+                    <h2 class="text-${data.balance >= 0 ? 'success' : 'danger'} mb-1">
+                        $${data.balance.toFixed(2)}
+                    </h2>
+                    <small class="text-muted">${data.currency} Balance</small>
+                    <div class="mt-2">
+                        <i class="fas fa-${data.balance >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger'}"></i>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        case 'spending_chart':
+            renderSpendingChart(container, data);
+            break;
+            
+        case 'goals':
+            renderGoalsWidget(container, data);
+            break;
+            
+        case 'recommendations':
+            renderRecommendationsWidget(container, data);
+            break;
+    }
+}
+
+// Render spending chart widget
+function renderSpendingChart(container, data) {
+    const categories = Object.keys(data);
+    if (categories.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-chart-pie fa-2x mb-2"></i>
+                <p>No spending data</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <canvas id="chart-${Date.now()}" width="200" height="150"></canvas>
+    `;
+    
+    const canvas = container.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categories,
+            datasets: [{
+                data: categories.map(cat => data[cat].amount),
+                backgroundColor: categories.map(cat => data[cat].color),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: { size: 10 }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Render goals widget
+function renderGoalsWidget(container, data) {
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-bullseye fa-2x mb-2"></i>
+                <p>No budget goals</p>
+                <a href="/budget-goals" class="btn btn-sm btn-primary">Set Goals</a>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="goals-list">';
+    data.slice(0, 3).forEach(goal => {
+        const progressClass = goal.over_budget ? 'danger' : (goal.progress > 80 ? 'warning' : 'success');
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="fw-medium">${goal.category}</small>
+                <small class="text-muted">$${goal.current.toFixed(2)}/$${goal.target.toFixed(2)}</small>
+            </div>
+            <div class="progress mb-3" style="height: 8px;">
+                <div class="progress-bar bg-${progressClass}" style="width: ${Math.min(100, goal.progress)}%"></div>
+            </div>
+        `;
+    });
+    
+    if (data.length > 3) {
+        html += `<a href="/budget-goals" class="btn btn-sm btn-outline-primary w-100">View All Goals</a>`;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// Render recommendations widget
+function renderRecommendationsWidget(container, data) {
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-lightbulb fa-2x mb-2"></i>
+                <p>No recommendations</p>
+                <a href="/smart-insights" class="btn btn-sm btn-primary">Get Insights</a>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="recommendations-list">';
+    data.slice(0, 2).forEach(rec => {
+        const priorityClass = rec.priority === 'high' ? 'danger' : (rec.priority === 'medium' ? 'warning' : 'info');
+        html += `
+            <div class="mb-3">
+                <h6 class="mb-1">${rec.title}</h6>
+                <p class="small text-muted mb-1">${rec.description}</p>
+                <span class="badge bg-${priorityClass}">${rec.priority} priority</span>
+            </div>
+        `;
+    });
+    
+    if (data.length > 2) {
+        html += `<a href="/smart-insights" class="btn btn-sm btn-outline-primary w-100">View All Insights</a>`;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// Refresh widget
+function refreshWidget(type, widgetId) {
+    document.getElementById(`widget-${widgetId}`).innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Refreshing...</p>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        loadWidgetData(type, widgetId);
+    }, 1000);
+}
+
+// Remove widget
+function removeWidget(widgetId) {
+    if (confirm('Are you sure you want to remove this widget?')) {
+        // In a real implementation, you'd make an AJAX call to delete the widget
+        document.querySelector(`[data-widget-id="${widgetId}"]`).remove();
+    }
+}
+
+// Edit widget
+function editWidget(widgetId) {
+    alert('Edit widget functionality would open a modal with configuration options');
+}
+
+// Make widgets sortable (if you have a library like Sortable.js)
+// This would allow drag-and-drop reordering of widgets
+</script>
+{% endblock %}

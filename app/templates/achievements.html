@@ -1,0 +1,392 @@
+{% extends "layout.html" %}
+
+{% block title %}Achievements - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <div>
+                    <h2 class="h3 mb-1">
+                        <i class="fas fa-trophy me-2 text-warning" aria-hidden="true"></i>Achievements
+                    </h2>
+                    <p class="text-muted mb-0">Your financial milestones and rewards</p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center bg-warning text-white">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ user_achievements|length }}</h3>
+                    <small>Earned</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ available_achievements|length }}</h3>
+                    <small>Available</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    {% set total_points = user_achievements|sum(attribute='achievement.points') %}
+                    <h3 class="mb-0">{{ total_points }}</h3>
+                    <small>Total Points</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    {% set completion_rate = (user_achievements|length / (user_achievements|length + available_achievements|length) * 100) if (user_achievements|length + available_achievements|length) > 0 else 0 %}
+                    <h3 class="mb-0">{{ "%.0f"|format(completion_rate) }}%</h3>
+                    <small>Completion</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earned Achievements -->
+    {% if user_achievements %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-medal me-2 text-warning"></i>
+                        Earned Achievements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for user_achievement in user_achievements %}
+                        <div class="col-12 col-md-6 col-lg-4 mb-3">
+                            <div class="card border-warning achievement-card earned">
+                                <div class="card-body text-center">
+                                    <div class="achievement-icon mb-3" style="color: {{ user_achievement.achievement.badge_color }}">
+                                        <i class="fas fa-{{ user_achievement.achievement.icon or 'trophy' }} fa-3x"></i>
+                                    </div>
+                                    <h6 class="card-title">{{ user_achievement.achievement.name }}</h6>
+                                    <p class="card-text small text-muted">{{ user_achievement.achievement.description }}</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-star me-1"></i>{{ user_achievement.achievement.points }} pts
+                                        </span>
+                                        <small class="text-muted">
+                                            {{ user_achievement.earned_at.strftime('%m/%d/%Y') }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="achievement-stamp">
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Available Achievements -->
+    {% if available_achievements %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-target me-2 text-info"></i>
+                        Available Achievements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for achievement in available_achievements %}
+                        <div class="col-12 col-md-6 col-lg-4 mb-3">
+                            <div class="card border-secondary achievement-card available">
+                                <div class="card-body text-center">
+                                    <div class="achievement-icon mb-3 text-muted">
+                                        <i class="fas fa-{{ achievement.icon or 'trophy' }} fa-3x"></i>
+                                    </div>
+                                    <h6 class="card-title">{{ achievement.name }}</h6>
+                                    <p class="card-text small text-muted">{{ achievement.description }}</p>
+                                    
+                                    <!-- Progress bar would go here if we tracked progress -->
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-info" style="width: 45%"></div>
+                                    </div>
+                                    <small class="text-muted">Progress: 45%</small>
+                                    
+                                    <div class="d-flex justify-content-center align-items-center mt-3">
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-star me-1"></i>{{ achievement.points }} pts
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="achievement-lock">
+                                        <i class="fas fa-lock text-muted"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- No Achievements Message -->
+    {% if not user_achievements and not available_achievements %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                    <h5>No Achievements Yet</h5>
+                    <p class="text-muted">Start using the expense tracker to unlock achievements!</p>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Add Your First Transaction
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Achievement Guide -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        How to Earn Achievements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-piggy-bank me-2 text-success"></i>Saving Achievements</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Maintain positive balance for 30 days</li>
+                                <li>• Save $1000 or more</li>
+                                <li>• Set and achieve savings goals</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-chart-line me-2 text-info"></i>Tracking Achievements</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Log 30 consecutive days of transactions</li>
+                                <li>• Add 100+ transactions</li>
+                                <li>• Use all expense categories</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-bullseye me-2 text-warning"></i>Budget Achievements</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Stay under budget for 3 months</li>
+                                <li>• Set up 5+ budget goals</li>
+                                <li>• Reduce spending by 20%</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-brain me-2 text-primary"></i>Smart User Achievements</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Use AI recommendations 5 times</li>
+                                <li>• Scan 10+ receipts</li>
+                                <li>• Export financial reports</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Achievement animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate earned achievements
+    const earnedAchievements = document.querySelectorAll('.achievement-card.earned');
+    earnedAchievements.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 50);
+        }, index * 100);
+    });
+});
+
+// Celebration effect for new achievements
+function celebrateAchievement(achievementName) {
+    // Create confetti effect
+    const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
+    
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.cssText = `
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            left: ${Math.random() * 100}vw;
+            top: -10px;
+            z-index: 9999;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fall 3s linear forwards;
+        `;
+        
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => {
+            confetti.remove();
+        }, 3000);
+    }
+    
+    // Show achievement notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        z-index: 10000;
+        max-width: 300px;
+        transform: translateX(100%);
+        transition: transform 0.5s ease;
+    `;
+    
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-trophy fa-2x text-warning me-3"></i>
+            <div>
+                <h6 class="mb-0">Achievement Unlocked!</h6>
+                <small>${achievementName}</small>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 4000);
+}
+
+// CSS for confetti animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    .achievement-card {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .achievement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .achievement-card.earned {
+        background: linear-gradient(135deg, #fff9c4 0%, #fff 100%);
+    }
+    
+    .achievement-stamp {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 1.5rem;
+    }
+    
+    .achievement-lock {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 1.2rem;
+    }
+    
+    .achievement-icon {
+        position: relative;
+    }
+    
+    .achievement-card.earned .achievement-icon {
+        animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+        from { text-shadow: 0 0 5px currentColor; }
+        to { text-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+    }
+`;
+document.head.appendChild(style);
+
+// Check for new achievements (mock)
+function checkForNewAchievements() {
+    // This would typically be called after certain actions
+    // For demo purposes, we'll simulate it
+    const achievements = [
+        "First Transaction",
+        "Budget Master",
+        "Savings Champion",
+        "AI Enthusiast"
+    ];
+    
+    // Randomly celebrate an achievement for demo
+    if (Math.random() < 0.1) { // 10% chance
+        const randomAchievement = achievements[Math.floor(Math.random() * achievements.length)];
+        celebrateAchievement(randomAchievement);
+    }
+}
+
+// Check for achievements every 30 seconds (for demo)
+setInterval(checkForNewAchievements, 30000);
+</script>
+{% endblock %}

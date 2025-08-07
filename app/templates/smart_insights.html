@@ -1,0 +1,255 @@
+{% extends "layout.html" %}
+
+{% block title %}Smart Insights - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <div>
+                    <h2 class="h3 mb-1">
+                        <i class="fas fa-brain me-2 text-primary" aria-hidden="true"></i>Smart Insights
+                    </h2>
+                    <p class="text-muted mb-0">AI-powered financial recommendations</p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('main.smart_insights') }}" class="btn btn-success">
+                        <i class="fas fa-sync me-1"></i>Refresh Insights
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>
+                        Smart Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recommendations %}
+                        <div class="row">
+                            {% for rec in recommendations %}
+                            <div class="col-12 col-lg-6 mb-3">
+                                <div class="card h-100 border-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-{{ 'exclamation-triangle' if rec.priority == 'high' else 'info-circle' if rec.priority == 'medium' else 'lightbulb' }} me-2 text-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}"></i>
+                                            <span class="badge bg-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}">
+                                                {{ rec.priority.title() }} Priority
+                                            </span>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">Impact: {{ "%.0f"|format(rec.impact_score) }}%</small>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ rec.title }}</h6>
+                                        <p class="card-text">{{ rec.description }}</p>
+                                        
+                                        <div class="progress mb-2" style="height: 6px;">
+                                            <div class="progress-bar bg-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}" 
+                                                 style="width: {{ rec.impact_score }}%"></div>
+                                        </div>
+                                        <small class="text-muted">Potential Impact</small>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="d-flex justify-content-between">
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="dismissRecommendation({{ rec.id }})">
+                                                <i class="fas fa-times me-1"></i>Dismiss
+                                            </button>
+                                            {% if rec.recommendation_type == 'budget' %}
+                                            <a href="{{ url_for('main.budget_goals') }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-bullseye me-1"></i>Set Budget
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-brain fa-3x text-muted mb-3"></i>
+                            <h6>No Recommendations Available</h6>
+                            <p class="text-muted">Add more transactions to get personalized AI insights!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spending Patterns Analysis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2 text-success"></i>
+                        Spending Pattern Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if patterns %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Average Amount</th>
+                                        <th>Predicted Next</th>
+                                        <th>Trend</th>
+                                        <th>Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pattern in patterns %}
+                                    <tr>
+                                        <td>
+                                            <span class="fw-medium">{{ pattern.category_name }}</span>
+                                        </td>
+                                        <td>${{ "%.2f"|format(pattern.average_amount) }}</td>
+                                        <td>
+                                            <span class="fw-bold {{ 'text-success' if pattern.predicted_next <= pattern.average_amount else 'text-danger' }}">
+                                                ${{ "%.2f"|format(pattern.predicted_next) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if pattern.trend == 'decreasing' else 'danger' if pattern.trend == 'increasing' else 'secondary' }}">
+                                                <i class="fas fa-{{ 'arrow-down' if pattern.trend == 'decreasing' else 'arrow-up' if pattern.trend == 'increasing' else 'minus' }} me-1"></i>
+                                                {{ pattern.trend.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 15px;">
+                                                    <div class="progress-bar bg-{{ 'success' if pattern.confidence_score > 0.7 else 'warning' if pattern.confidence_score > 0.4 else 'danger' }}" 
+                                                         style="width: {{ (pattern.confidence_score * 100) }}%"></div>
+                                                </div>
+                                                <small class="text-muted">{{ "%.0f"|format(pattern.confidence_score * 100) }}%</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <h6>No Pattern Data Available</h6>
+                            <p class="text-muted">We need more transaction data to analyze your spending patterns.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Predictions Chart -->
+    {% if patterns %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crystal-ball me-2 text-info"></i>
+                        Spending Predictions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="predictionsChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Dismiss recommendation function
+function dismissRecommendation(recId) {
+    if (confirm('Are you sure you want to dismiss this recommendation?')) {
+        // Here you would make an AJAX call to mark the recommendation as dismissed
+        console.log('Dismissing recommendation:', recId);
+        // Remove the card with animation
+        const card = event.target.closest('.col-12.col-lg-6');
+        card.style.opacity = '0.5';
+        setTimeout(() => {
+            card.remove();
+        }, 300);
+    }
+}
+
+// Predictions Chart
+{% if patterns %}
+const predictionsCtx = document.getElementById('predictionsChart').getContext('2d');
+const predictionsChart = new Chart(predictionsCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for pattern in patterns %}'{{ pattern.category_name }}'{{ ',' if not loop.last }}{% endfor %}],
+        datasets: [{
+            label: 'Average Spending',
+            data: [{% for pattern in patterns %}{{ pattern.average_amount }}{{ ',' if not loop.last }}{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2
+        }, {
+            label: 'Predicted Next',
+            data: [{% for pattern in patterns %}{{ pattern.predicted_next }}{{ ',' if not loop.last }}{% endfor %}],
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '$' + value.toFixed(2);
+                    }
+                }
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'AI-Powered Spending Predictions vs Historical Average'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': $' + context.parsed.y.toFixed(2);
+                    }
+                }
+            }
+        }
+    }
+});
+{% endif %}
+
+// Auto-refresh insights every 10 minutes
+setInterval(() => {
+    console.log('Auto-refreshing insights...');
+    // You could add automatic refresh logic here
+}, 600000);
+</script>
+{% endblock %}

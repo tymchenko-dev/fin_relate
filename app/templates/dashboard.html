@@ -1,0 +1,356 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - Expense Tracker{% endblock %}
+
+{% block content %}
+<!-- Header and balance with responsive layout -->
+<div class="row mb-4">
+    <div class="col-12 col-lg-8 mb-3 mb-lg-0">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+            <div>
+                <h2 class="h3"><i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i>Dashboard</h2>
+                <p class="text-muted mb-0">Welcome, {{ current_user.username }}!</p>
+            </div>
+            <div class="mt-2 mt-sm-0">
+                <div class="btn-group" role="group" aria-label="Export options">
+                    <button type="button" 
+                            class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false"
+                            aria-label="Export transactions">
+                        <i class="fas fa-download me-1" aria-hidden="true"></i>Export
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item no-loading" 
+                               href="{{ url_for('main.export_transactions') }}"
+                               aria-label="Export all transactions">
+                                <i class="fas fa-file-csv me-2" aria-hidden="true"></i>All Transactions
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item no-loading" 
+                               href="{{ url_for('main.export_transactions', type='income') }}"
+                               aria-label="Export income only">
+                                <i class="fas fa-arrow-up me-2 text-success" aria-hidden="true"></i>Income Only
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item no-loading" 
+                               href="{{ url_for('main.export_transactions', type='expense') }}"
+                               aria-label="Export expenses only">
+                                <i class="fas fa-arrow-down me-2 text-danger" aria-hidden="true"></i>Expenses Only
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" 
+                               href="#" 
+                               data-bs-toggle="modal" 
+                               data-bs-target="#exportModal"
+                               aria-label="Custom export options">
+                                <i class="fas fa-filter me-2" aria-hidden="true"></i>Custom Export
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="card bg-{% if balance >= 0 %}success{% else %}danger{% endif %} text-white balance-card">
+            <div class="card-body text-center">
+                <h5 class="card-title mb-2">
+                    <i class="fas fa-{% if balance >= 0 %}plus{% else %}minus{% endif %}-circle me-1" aria-hidden="true"></i>
+                    Current Balance
+                </h5>
+                <h3 class="card-text mb-0" aria-label="Balance amount">${{ "%.2f"|format(balance) }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add transaction form with enhanced mobile layout -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle me-2" aria-hidden="true"></i>Add Transaction
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.add_transaction') }}" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            {{ form.amount.label(class="form-label") }}
+                            {{ form.amount(class="form-control", placeholder="0.00", step="0.01", min="0", required="required", **{"aria-describedby": "amountHelp"}) }}
+                            <div class="invalid-feedback">Please enter a valid amount.</div>
+                            <small id="amountHelp" class="form-text text-muted">Enter amount in dollars</small>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            {{ form.transaction_type.label(class="form-label") }}
+                            {{ form.transaction_type(class="form-select", required=true) }}
+                            <div class="invalid-feedback">Please select a transaction type.</div>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            {{ form.category_id.label(class="form-label") }}
+                            {{ form.category_id(class="form-select", required=true) }}
+                            <div class="invalid-feedback">Please select a category.</div>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            {{ form.date.label(class="form-label") }}
+                            {{ form.date(class="form-control", required=true) }}
+                            <div class="invalid-feedback">Please select a date.</div>
+                        </div>
+                        
+                        <div class="col-12 col-lg-9">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", placeholder="Description (optional)", maxlength="200") }}
+                            <small class="form-text text-muted">Optional description for this transaction</small>
+                        </div>
+                        
+                        <div class="col-12 col-lg-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100" aria-label="Add new transaction">
+                                <i class="fas fa-plus me-2" aria-hidden="true"></i>
+                                <span class="d-none d-sm-inline">Add Transaction</span>
+                                <span class="d-inline d-sm-none">Add</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent transactions list with enhanced mobile view -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <h5 class="mb-2 mb-sm-0">
+                    <i class="fas fa-list me-2" aria-hidden="true"></i>Recent Transactions
+                </h5>
+                <a href="{{ url_for('main.stats') }}" class="btn btn-outline-primary btn-sm" aria-label="View statistics">
+                    <i class="fas fa-chart-pie me-1" aria-hidden="true"></i>Statistics
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if transactions %}
+                    <!-- Desktop/Tablet view -->
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-hover mb-0" role="table">
+                            <thead>
+                                <tr role="row">
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col" class="d-none d-lg-table-cell">Description</th>
+                                    <th scope="col" width="80">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr class="transaction-{{ transaction.transaction_type }}" role="row">
+                                    <td data-label="Date">
+                                        <time datetime="{{ transaction.date.isoformat() }}">
+                                            {{ transaction.date.strftime('%m/%d/%Y') }}
+                                        </time>
+                                    </td>
+                                    <td data-label="Type">
+                                        {% if transaction.transaction_type == 'income' %}
+                                            <span class="badge bg-success" aria-label="Income transaction">
+                                                <i class="fas fa-plus me-1" aria-hidden="true"></i>Income
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger" aria-label="Expense transaction">
+                                                <i class="fas fa-minus me-1" aria-hidden="true"></i>Expense
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td data-label="Amount" class="fw-bold {% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                        <span aria-label="Amount {{ '%.2f'|format(transaction.amount) }} dollars">
+                                            {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %} ${{ "%.2f"|format(transaction.amount) }}
+                                        </span>
+                                    </td>
+                                    <td data-label="Category">
+                                        <span class="badge" 
+                                              style="background-color: {{ transaction.category.color }}; color: white;"
+                                              aria-label="Category {{ transaction.category.name }}">
+                                            {{ transaction.category.name }}
+                                        </span>
+                                    </td>
+                                    <td data-label="Description" class="d-none d-lg-table-cell">
+                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ transaction.description or 'No description' }}">
+                                            {{ transaction.description or '-' }}
+                                        </span>
+                                    </td>
+                                    <td data-label="Actions">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteTransaction({{ transaction.id }})"
+                                                aria-label="Delete transaction from {{ transaction.date.strftime('%m/%d/%Y') }}">
+                                            <i class="fas fa-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Mobile view - Card layout -->
+                    <div class="d-block d-md-none">
+                        {% for transaction in transactions %}
+                        <div class="border-bottom transaction-{{ transaction.transaction_type }} p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex flex-column">
+                                    <div class="d-flex align-items-center mb-1">
+                                        {% if transaction.transaction_type == 'income' %}
+                                            <span class="badge bg-success me-2">
+                                                <i class="fas fa-plus me-1" aria-hidden="true"></i>Income
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger me-2">
+                                                <i class="fas fa-minus me-1" aria-hidden="true"></i>Expense
+                                            </span>
+                                        {% endif %}
+                                        <small class="text-muted">
+                                            {{ transaction.date.strftime('%m/%d/%Y') }}
+                                        </small>
+                                    </div>
+                                    <div class="fw-bold {% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %} fs-5">
+                                        {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %} ${{ "%.2f"|format(transaction.amount) }}
+                                    </div>
+                                </div>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-danger ms-2" 
+                                        onclick="deleteTransaction({{ transaction.id }})"
+                                        aria-label="Delete transaction">
+                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge" 
+                                      style="background-color: {{ transaction.category.color }}; color: white;">
+                                    {{ transaction.category.name }}
+                                </span>
+                                {% if transaction.description %}
+                                <small class="text-muted text-end ms-2" style="max-width: 150px;">
+                                    {{ transaction.description }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3 text-muted" aria-hidden="true"></i>
+                        <h6>You don't have any transactions yet</h6>
+                        <small>Add your first transaction using the form above</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form validation and delete confirmation script -->
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Delete transaction confirmation
+function deleteTransaction(transactionId) {
+    if (confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
+        window.location.href = "{{ url_for('main.delete_transaction', transaction_id=0) }}".replace('0', transactionId);
+    }
+}
+
+// Auto-resize description textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const description = document.querySelector('input[name="description"]');
+    if (description) {
+        description.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    }
+});
+</script>
+
+<!-- Custom Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exportModalLabel">
+                    <i class="fas fa-download me-2" aria-hidden="true"></i>Custom Export
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('main.export_transactions') }}" method="get">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date">
+                            <small class="form-text text-muted">Leave empty for all dates</small>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                            <small class="form-text text-muted">Leave empty for all dates</small>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="export_type" class="form-label">Transaction Type</label>
+                            <select class="form-select" id="export_type" name="type">
+                                <option value="all">All Transactions</option>
+                                <option value="income">Income Only</option>
+                                <option value="expense">Expenses Only</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="export_category" class="form-label">Category</label>
+                            <select class="form-select" id="export_category" name="category">
+                                <option value="all">All Categories</option>
+                                {% for category in form.category_id.choices %}
+                                <option value="{{ category[0] }}">{{ category[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download me-1" aria-hidden="true"></i>Export CSV
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

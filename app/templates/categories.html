@@ -1,0 +1,203 @@
+{% extends "layout.html" %}
+
+{% block title %}Categories - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <div>
+                    <h2 class="h3 mb-1"><i class="fas fa-tags me-2" aria-hidden="true"></i>Categories</h2>
+                    <p class="text-muted mb-0">Manage your transaction categories</p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary me-2" aria-label="Back to dashboard">
+                        <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('main.add_category') }}" class="btn btn-success" aria-label="Add new category">
+                        <i class="fas fa-plus me-1" aria-hidden="true"></i>Add Category
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if categories %}
+    <!-- Categories Grid -->
+    <div class="row g-4">
+        {% for category in categories %}
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card h-100 category-card">
+                <div class="card-header d-flex align-items-center justify-content-between" 
+                     style="background-color: {{ category.color }}; color: white;">
+                    <h6 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-tag me-1" aria-hidden="true"></i>{{ category.name }}
+                    </h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false"
+                                aria-label="Category actions">
+                            <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" 
+                                   href="{{ url_for('main.edit_category', category_id=category.id) }}"
+                                   aria-label="Edit category {{ category.name }}">
+                                    <i class="fas fa-edit me-2" aria-hidden="true"></i>Edit
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" 
+                                   href="#" 
+                                   onclick="deleteCategory({{ category.id }}, '{{ category.name }}')"
+                                   aria-label="Delete category {{ category.name }}">
+                                    <i class="fas fa-trash me-2" aria-hidden="true"></i>Delete
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if category.description %}
+                        <p class="card-text text-muted small">{{ category.description }}</p>
+                    {% else %}
+                        <p class="card-text text-muted small fst-italic">No description</p>
+                    {% endif %}
+                    
+                    <!-- Category Statistics -->
+                    <div class="mt-3">
+                        {% set transaction_count = category.transactions|length %}
+                        {% if transaction_count > 0 %}
+                            {% set total_amount = category.transactions|selectattr('transaction_type', 'equalto', 'expense')|sum(attribute='amount') %}
+                            <small class="text-muted">
+                                <i class="fas fa-calculator me-1" aria-hidden="true"></i>
+                                {{ transaction_count }} transaction{{ 's' if transaction_count != 1 else '' }}
+                                {% if total_amount > 0 %}
+                                    <br><i class="fas fa-dollar-sign me-1" aria-hidden="true"></i>
+                                    Total: ${{ "%.2f"|format(total_amount) }}
+                                {% endif %}
+                            </small>
+                        {% else %}
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1" aria-hidden="true"></i>No transactions yet
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Color: 
+                            <span class="badge rounded-pill" style="background-color: {{ category.color }}; color: white;">
+                                {{ category.color }}
+                            </span>
+                        </small>
+                        <a href="{{ url_for('main.edit_category', category_id=category.id) }}" 
+                           class="btn btn-sm btn-outline-primary"
+                           aria-label="Edit category {{ category.name }}">
+                            <i class="fas fa-edit" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Categories Summary -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2" aria-hidden="true"></i>Categories Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-primary">{{ categories|length }}</h4>
+                                <small class="text-muted">Total Categories</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                {% set used_categories = categories|selectattr('transactions')|list|length %}
+                                <h4 class="text-success">{{ used_categories }}</h4>
+                                <small class="text-muted">In Use</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-warning">{{ (categories|length) - used_categories }}</h4>
+                                <small class="text-muted">Unused</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                {% set total_transactions = 0 %}
+                                {% for category in categories %}
+                                    {% set total_transactions = total_transactions + category.transactions|length %}
+                                {% endfor %}
+                                <h4 class="text-info">{{ total_transactions }}</h4>
+                                <small class="text-muted">Total Transactions</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-tags fa-3x text-muted mb-3" aria-hidden="true"></i>
+                    <h5>No Categories Found</h5>
+                    <p class="text-muted">You haven't created any categories yet. Start by adding your first category.</p>
+                    <a href="{{ url_for('main.add_category') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-1" aria-hidden="true"></i>Add Your First Category
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteCategory(categoryId, categoryName) {
+    if (confirm(`Are you sure you want to delete the category "${categoryName}"? This action cannot be undone.`)) {
+        window.location.href = "{{ url_for('main.delete_category', category_id=0) }}".replace('0', categoryId);
+    }
+}
+
+// Add custom CSS for category cards
+document.addEventListener('DOMContentLoaded', function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .category-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+        .category-card .card-header {
+            border-bottom: none;
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

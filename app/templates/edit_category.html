@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ action }} Category - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{{ 'plus' if action == 'Add' else 'edit' }} me-2" aria-hidden="true"></i>
+                        {{ action }} Category
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control", placeholder="e.g., Food, Transportation", required=true) }}
+                            <div class="invalid-feedback">Please enter a category name.</div>
+                            {% if form.name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.name.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="3", placeholder="Optional description for this category") }}
+                            <div class="form-text">Optional: Add a description to help identify this category</div>
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.description.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.color.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.color(class="form-control form-control-color", type="color", title="Choose category color") }}
+                                <span class="input-group-text">
+                                    <i class="fas fa-palette" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="form-text">This color will be used in charts and category displays</div>
+                            {% if form.color.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.color.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="mb-4">
+                            <label class="form-label">Preview</label>
+                            <div class="card">
+                                <div class="card-header preview-header" style="background-color: {{ form.color.data or '#007bff' }}; color: white;">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-tag me-1" aria-hidden="true"></i>
+                                        <span id="preview-name">{{ form.name.data or 'Category Name' }}</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text text-muted small" id="preview-description">
+                                        {{ form.description.data or 'Category description will appear here' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.categories') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1" aria-hidden="true"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-{{ 'success' if action == 'Add' else 'primary' }}">
+                                <i class="fas fa-{{ 'plus' if action == 'Add' else 'save' }} me-1" aria-hidden="true"></i>
+                                {{ action }} Category
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2" aria-hidden="true"></i>Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2" aria-hidden="true"></i>
+                            Choose descriptive names that are easy to remember
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2" aria-hidden="true"></i>
+                            Use different colors to easily distinguish categories in charts
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2" aria-hidden="true"></i>
+                            Add descriptions to clarify what expenses belong in each category
+                        </li>
+                        {% if action == 'Edit' and category %}
+                        <li class="mb-0">
+                            <i class="fas fa-info-circle text-info me-2" aria-hidden="true"></i>
+                            This category has {{ category.transactions|length }} transaction{{ 's' if category.transactions|length != 1 else '' }}
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Real-time preview updates
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.querySelector('input[name="name"]');
+    const descriptionInput = document.querySelector('textarea[name="description"]');
+    const colorInput = document.querySelector('input[name="color"]');
+    const previewName = document.getElementById('preview-name');
+    const previewDescription = document.getElementById('preview-description');
+    const previewHeader = document.querySelector('.preview-header');
+
+    function updatePreview() {
+        // Update name
+        previewName.textContent = nameInput.value || 'Category Name';
+        
+        // Update description
+        previewDescription.textContent = descriptionInput.value || 'Category description will appear here';
+        
+        // Update color
+        previewHeader.style.backgroundColor = colorInput.value;
+    }
+
+    // Add event listeners
+    nameInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    colorInput.addEventListener('input', updatePreview);
+
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+
+    // Initial update
+    updatePreview();
+});
+</script>
+{% endblock %}
