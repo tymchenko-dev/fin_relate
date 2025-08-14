@@ -1,7 +1,7 @@
 # FinRelate
 
-![Dashboard Screenshot](img/FinRelate%20Dashboard.png)
-![Welcome Screenshot](img/FinRelate%20Logo.jpg)
+![Dashboard Screenshot](screen/FinRelate%20-%20Smart%20Finance%20Management.png)
+![Welcome Screenshot](screen/Contact%20-%20FinRelate.png)
 
 FinRelate is a modern, AI-powered personal finance management platform that helps you track expenses, manage budgets, analyze your financial data, and achieve your financial goals with ease. The project is currently under active development and will continue to be updated with new features and improvements.
 
@@ -22,16 +22,16 @@ FinRelate is a modern, AI-powered personal finance management platform that help
 ## Screenshots
 
 ### Dashboard
-![Dashboard](img/FinRelate%20Dashboard.png)
+![Dashboard](screen/FinRelate%20-%20Smart%20Finance%20Management.png)
 
 ### Welcome Page
-![Welcome](img/FinRelate%20Logo.jpg)
+![Welcome](screen/Screenshot%202025-08-14%20at%202.22.46%E2%80%AFPM.png)
 
 ### Contact Page
-![Contact](img/Footer.png)
+![Contact](screen/Contact%20-%20FinRelate.png)
 
 ### Analytics
-![Analytics](img/Chart%20Cards.png)
+![Analytics](screen/Screenshot%202025-08-14%20at%202.22.58%E2%80%AFPM.png)
 
 ## Quick Start
 
