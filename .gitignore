@@ -1,3 +1,8 @@
+img/
+screen/
+# Ignore local instance data and environment files
+instance/
+.env
 # Python
 __pycache__/
 *.py[cod]
