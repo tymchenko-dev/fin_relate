@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="FinRelate - Simple and convenient tool for personal finance management">
+    <meta name="keywords" content="finrelate, finance, budget, money management, expense tracker">
+    <meta name="author" content="FinRelate">
+    
+    <!-- Favicon for better browser support -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    
+    <title>Financial Analytics - FinRelate</title>
+    
+    <!-- Bootstrap CSS with integrity check -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+          rel="stylesheet" 
+          integrity="sha384-9ndCyUaIKp96We5BcKPodPIDVMrCqJ4tAX8rZfOl/P/cN7UF5mGMhPOEOJbMKKQ" 
+          crossorigin="anonymous">
+    
+    <!-- Font Awesome for icons with fallback -->
+    <link rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" 
+          referrerpolicy="no-referrer">
+    
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/finrelate.css?v=20250808">
+    <link rel="stylesheet" href="/static/dashboard.css?v=20250808-3">
+    
+    <!-- Additional meta tags for better mobile experience -->
+    <meta name="theme-color" content="#7AC3AA">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FinRelate">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Navigation bar with enhanced mobile support -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/" aria-label="FinRelate Home">
+                <img src="/static/Logotip.png" alt="FinRelate Logo" style="width: 32px; height: 32px; margin-right: 8px;">
+                FinRelate
+            </a>
+            
+            <!-- Mobile toggle button with accessibility -->
+            <button class="navbar-toggler" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" 
+                    aria-expanded="false" 
+                    aria-label="Toggle navigation menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard" aria-label="Dashboard">
+                                <i class="fas fa-tachometer-alt me-1" aria-hidden="true"></i>
+                                <span class="d-lg-inline">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/stats" aria-label="Statistics">
+                                <i class="fas fa-chart-bar me-1" aria-hidden="true"></i>
+                                <span class="d-lg-inline">Statistics</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" 
+                               href="#" 
+                               id="navbarDropdown" 
+                               role="button" 
+                               data-bs-toggle="dropdown" 
+                               aria-expanded="false"
+                               aria-label="User menu">
+                                <i class="fas fa-user me-1" aria-hidden="true"></i>
+                                <span class="d-lg-inline">{{ current_user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="/dashboard" aria-label="Go to dashboard">
+                                        <i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i>Dashboard
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="/auth/logout" aria-label="Logout from account">
+                                        <i class="fas fa-sign-out-alt me-2" aria-hidden="true"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash messages with better accessibility -->
+    <div class="container-fluid mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" 
+                         role="alert" 
+                         aria-live="assertive">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }} me-2" aria-hidden="true"></i>
+                        {{ message }}
+                        <button type="button" 
+                                class="btn-close" 
+                                data-bs-dismiss="alert" 
+                                aria-label="Close alert message"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main content with proper ARIA landmarks -->
+    <main class="container-fluid mt-4 flex-grow-1" role="main">
+        
+<style>
+    /* Hide the main navbar and flash messages for dashboard consistency */
+    .navbar { display: none !important; }
+    .container-fluid .alert { display: none !important; }
+    main.container-fluid { padding: 0 !important; margin: 0 !important; }
+    body { overflow-x: hidden; }
+</style>
+
+<!-- Dashboard Layout with Sidebar -->
+<div class="dashboard-layout d-flex">
+    <!-- Fixed Sidebar Toggle Button -->
+    <button class="fixed-sidebar-toggle" id="fixedSidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Modern Sidebar -->
+    <div class="modern-sidebar" id="modernSidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand" title="Go to Homepage">
+                <img src="/static/new-logo.png" alt="FinRelate Logo" class="sidebar-logo">
+                <span class="brand-text">FinRelate</span>
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.stats') }}">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('main.analytics') }}">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Financial Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.categories') }}">
+                        <i class="fas fa-tags"></i>
+                        <span>Categories</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.budget_goals') }}">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Budget Goals</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.achievements') }}">
+                        <i class="fas fa-trophy"></i>
+                        <span>Achievements</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.notifications') }}">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.settings') }}">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.receipt_scanner') }}">
+                        <i class="fas fa-camera"></i>
+                        <span>Receipt Scanner</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.smart_insights') }}">
+                        <i class="fas fa-brain"></i>
+                        <span>Smart Insights</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile-sidebar">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">demo_user</span>
+                    <small class="user-status">Online</small>
+                </div>
+                <div class="user-actions">
+                    <a href="/auth/logout" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="dashboard-container">
+            <!-- Modern Header -->
+            <div class="modern-dashboard-header">
+                <div class="container-fluid">
+                    <div class="row align-items-center py-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <!-- Sidebar toggle button -->
+                                <button class="sidebar-toggle-btn me-3" id="sidebarToggle">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                                <div class="welcome-section">
+                                    <h1 class="welcome-title" style="color: rgba(255, 255, 255, 0.95);">
+                                        <i class="fas fa-chart-line me-2"></i>Financial Analytics
+                                    </h1>
+                                    <p class="welcome-subtitle mb-0" style="color: rgba(255, 255, 255, 0.8);">Comprehensive analysis of your financial data</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-md-end mt-3 mt-md-0">
+                                <a href="/dashboard" class="btn btn-outline-light btn-sm" style="position: absolute; top: 15px; right: 20px; z-index: 1000;">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+<style>
+    /* Dashboard Layout Styles */
+    .dashboard-layout {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--finrelate-light) 0%, #ffffff 100%);
+    }
+    
+    .main-content {
+        margin-left: 280px; /* Space for sidebar */
+        flex: 1;
+        padding: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .main-content {
+            margin-left: 0;
+        }
+    }
+
+    /* CSS Variables for FinRelate Theme */
+    :root {
+        --finrelate-primary: #7AC3AA;
+        --finrelate-secondary: #68B39A;
+        --deep-blue: #2C5282;
+        --calm-green: #81C784;
+        --finrelate-light: #F8FFFE;
+        --text-dark: #2D3748;
+        --text-light: #718096;
+    }
+
+    /* Page Background */
+    body {
+        background: linear-gradient(135deg, var(--finrelate-light) 0%, #ffffff 100%);
+    }
+
+    /* Card Styles */
+    .card {
+        background: white;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(122, 195, 170, 0.1);
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--deep-blue) 0%, var(--finrelate-primary) 100%);
+        color: white;
+        border: none;
+        border-radius: 20px 20px 0 0 !important;
+        padding: 1.5rem;
+        font-weight: 600;
+    }
+
+    .card-header h5 {
+        margin: 0;
+        color: white;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    /* Analytics specific styles */
+    .analytics-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 2rem;
+        background: white;
+        border: 1px solid rgba(122, 195, 170, 0.1);
+    }
+    
+    .analytics-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .category-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(122, 195, 170, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .category-item:hover {
+        background: linear-gradient(135deg, rgba(122, 195, 170, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+        transform: scale(1.01);
+        box-shadow: 0 2px 15px rgba(122, 195, 170, 0.1);
+        padding-left: 1rem;
+    }
+    
+    .category-item:last-child {
+        border-bottom: none;
+    }
+    
+    .category-name {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+    
+    .category-amount {
+        font-weight: bold;
+        color: #e74c3c;
+    }
+    
+    .insight-card {
+        background: linear-gradient(135deg, var(--deep-blue) 0%, var(--finrelate-primary) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 15px 40px rgba(44, 82, 130, 0.2);
+    }
+    
+    .insight-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .insight-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+</style>
+
+            <!-- Analytics Content -->
+            <div class="container-fluid px-4" style="margin-top: 50px;">
+                <!-- Key Metrics -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card analytics-card text-center">
+                            <div class="card-body">
+                                <div class="stat-icon" style="color: var(--finrelate-primary);">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="stat-value" style="color: var(--finrelate-primary);">${{ "%.2f"|format(balance) }}</div>
+                                <div class="stat-label">Current Balance</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card analytics-card text-center">
+                            <div class="card-body">
+                                <div class="stat-icon text-success">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div class="stat-value text-success">${{ "%.2f"|format(total_income) }}</div>
+                                <div class="stat-label">Total Income</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card analytics-card text-center">
+                            <div class="card-body">
+                                <div class="stat-icon text-danger">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                                <div class="stat-value text-danger">${{ "%.2f"|format(total_expenses) }}</div>
+                                <div class="stat-label">Total Expenses</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card analytics-card text-center">
+                            <div class="card-body">
+                                <div class="stat-icon" style="color: var(--deep-blue);">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="stat-value" style="color: var(--deep-blue);">{{ transaction_count }}</div>
+                                <div class="stat-label">Total Transactions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- This Month Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card analytics-card">
+                            <div class="card-header">
+                                <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>This Month</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 text-center">
+                                        <div class="stat-icon text-success">
+                                            <i class="fas fa-plus-circle"></i>
+                                        </div>
+                                        <div class="stat-value text-success">${{ "%.2f"|format(monthly_income) }}</div>
+                                        <div class="stat-label">Monthly Income</div>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div class="stat-icon text-danger">
+                                            <i class="fas fa-minus-circle"></i>
+                                        </div>
+                                        <div class="stat-value text-danger">${{ "%.2f"|format(monthly_expenses) }}</div>
+                                        <div class="stat-label">Monthly Expenses</div>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div class="stat-icon" style="color: var(--finrelate-primary);">
+                                            <i class="fas fa-piggy-bank"></i>
+                                        </div>
+                                        <div class="stat-value" style="color: var(--finrelate-primary);">${{ "%.2f"|format(monthly_income - monthly_expenses) }}</div>
+                                        <div class="stat-label">Net Savings</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Transaction Trends -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card analytics-card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-trending-up me-2"></i>Transaction Trends</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6 text-center">
+                                        <div class="stat-value">{{ avg_transaction }}</div>
+                                        <div class="stat-label">Avg per Day</div>
+                                    </div>
+                                    <div class="col-6 text-center">
+                                        <div class="stat-value">${{ "%.2f"|format(daily_average) }}</div>
+                                        <div class="stat-label">Daily Average</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="insight-card">
+                            <div class="insight-value">{{ "%.1f"|format(savings_rate) }}%</div>
+                            <div class="insight-label">Savings Rate</div>
+                            <small>Percentage of income saved this month</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category Breakdown -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card analytics-card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Spending by Category</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                {% if categories_data %}
+                                    {% for category in categories_data %}
+                                    <div class="category-item">
+                                        <div>
+                                            <span class="category-name">{{ category.name }}</span>
+                                            <small class="text-muted d-block">{{ category.count }} transactions</small>
+                                        </div>
+                                        <div class="category-amount">${{ "%.2f"|format(category.total) }}</div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-chart-pie fa-3x mb-3" style="color: var(--finrelate-primary);"></i>
+                                        <p class="text-muted">No expense categories found</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- End container-fluid -->
+        </div> <!-- End dashboard-container -->
+    </div> <!-- End main-content -->
+</div> <!-- End dashboard-layout -->
+
+    </main>
+
+    <!-- Modern Footer -->
+    <footer class="modern-footer" style="background: linear-gradient(135deg, #2C5282 0%, #7AC3AA 100%) !important; color: #ffffff !important;" role="contentinfo">
+        <div class="container-fluid">
+            <div class="footer-top">
+                <div class="row align-items-center">
+                    <!-- Logo Section -->
+                    <div class="col-md-3">
+                        <div class="footer-brand">
+                            <img src="/static/new-logo.png" alt="FinRelate Logo" class="footer-logo-img">
+                            <span class="footer-brand-text">FinRelate</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Links -->
+                    <div class="col-md-6">
+                        <div class="footer-nav">
+                            <a href="#" class="footer-nav-link">About</a>
+                            <a href="#" class="footer-nav-link">Privacy Policy</a>
+                            <a href="/privacy-policy" class="footer-nav-link">Privacy Policy</a>
+                            <a href="#" class="footer-nav-link">Terms</a>
+                            <a href="/terms" class="footer-nav-link">Terms</a>
+                            <a href="#" class="footer-nav-link">Contact</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Social Icons -->
+                    <div class="col-md-3">
+                        <div class="footer-social">
+                            <a href="#" class="footer-social-link" aria-label="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="footer-social-link" aria-label="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="footer-social-link" aria-label="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="footer-copyright">© 2024 FinRelate. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="footer-tagline">
+                            <i class="fas fa-robot me-2"></i>
+                            Data-driven financial insights powered by AI.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with enhanced error handling -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" 
+            crossorigin="anonymous"
+            onerror="console.error('Failed to load Bootstrap JS')"></script>
+    
+    <!-- Service Worker for offline support (optional) -->
+    <script>
+        // Basic service worker registration for PWA capabilities
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('SW registered: ', registration);
+                }).catch(function(registrationError) {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+        
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript error:', e.error);
+        });
+        
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            if ('performance' in window) {
+                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                console.log('Page load time:', loadTime + 'ms');
+            }
+        });
+    </script>
+
+    <!-- Sidebar functionality script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Analytics page: DOM loaded, initializing sidebar...');
+        
+        // Mobile sidebar toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const fixedSidebarToggle = document.getElementById('fixedSidebarToggle');
+        const sidebar = document.querySelector('.modern-sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const overlay = document.createElement('div');
+        
+        console.log('Elements found:', {
+            sidebarToggle: !!sidebarToggle,
+            fixedSidebarToggle: !!fixedSidebarToggle,
+            sidebar: !!sidebar,
+            mainContent: !!mainContent
+        });
+        
+        if ((sidebarToggle || fixedSidebarToggle) && sidebar && mainContent) {
+            console.log('All elements found, setting up toggle functionality...');
+            
+            // Create overlay for mobile
+            overlay.className = 'sidebar-overlay d-md-none';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: none;
+            `;
+            document.body.appendChild(overlay);
+            
+            // Toggle sidebar function
+            function toggleSidebar() {
+                console.log('toggleSidebar called!');
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                console.log('Current state - isCollapsed:', isCollapsed);
+                
+                if (isCollapsed) {
+                    // Show sidebar
+                    console.log('Showing sidebar...');
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                    document.body.classList.remove('sidebar-collapsed');
+                    document.body.classList.add('sidebar-open');
+                    
+                    // Change icon to bars for both buttons
+                    if (sidebarToggle) {
+                        const icon = sidebarToggle.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    }
+                    if (fixedSidebarToggle) {
+                        const fixedIcon = fixedSidebarToggle.querySelector('i');
+                        fixedIcon.className = 'fas fa-times';
+                    }
+                } else {
+                    // Hide sidebar
+                    console.log('Hiding sidebar...');
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('expanded');
+                    document.body.classList.add('sidebar-collapsed');
+                    document.body.classList.remove('sidebar-open');
+                    
+                    // Change icon to arrow right for original, bars for fixed
+                    if (sidebarToggle) {
+                        const icon = sidebarToggle.querySelector('i');
+                        icon.className = 'fas fa-arrow-right';
+                    }
+                    if (fixedSidebarToggle) {
+                        const fixedIcon = fixedSidebarToggle.querySelector('i');
+                        fixedIcon.className = 'fas fa-bars';
+                    }
+                }
+                
+                console.log('After toggle - sidebar classes:', sidebar.className);
+                console.log('After toggle - mainContent classes:', mainContent.className);
+                
+                // Mobile overlay logic
+                if (window.innerWidth < 768) {
+                    overlay.style.display = isCollapsed ? 'none' : 'block';
+                }
+            }
+            
+            // Add event listeners to both buttons
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function(e) {
+                    console.log('sidebarToggle clicked!');
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+                console.log('sidebarToggle event listener attached');
+            }
+            if (fixedSidebarToggle) {
+                fixedSidebarToggle.addEventListener('click', function(e) {
+                    console.log('fixedSidebarToggle clicked!');
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+                console.log('fixedSidebarToggle event listener attached');
+            }
+            
+            // Mobile overlay click handler
+            overlay.addEventListener('click', function() {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('expanded');
+                    overlay.style.display = 'none';
+                    
+                    if (sidebarToggle) {
+                        const icon = sidebarToggle.querySelector('i');
+                        icon.className = 'fas fa-arrow-right';
+                    }
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    overlay.style.display = 'none';
+                }
+            });
+        } else {
+            console.log('ERROR: Not all required elements found!');
+            console.log('Missing elements:', {
+                sidebarToggle: !sidebarToggle ? 'MISSING' : 'found',
+                fixedSidebarToggle: !fixedSidebarToggle ? 'MISSING' : 'found',
+                sidebar: !sidebar ? 'MISSING' : 'found',
+                mainContent: !mainContent ? 'MISSING' : 'found'
+            });
+        }
+
+        // Analytics page specific animations
+        // Animate statistics on load
+        const statValues = document.querySelectorAll('.stat-value');
+        statValues.forEach(function(stat) {
+            stat.style.opacity = '0';
+            stat.style.transform = 'translateY(20px)';
+            
+            setTimeout(function() {
+                stat.style.transition = 'all 0.6s ease';
+                stat.style.opacity = '1';
+                stat.style.transform = 'translateY(0)';
+            }, Math.random() * 300);
+        });
+        
+        // Add hover effects to category items
+        const categoryItems = document.querySelectorAll('.category-item');
+        categoryItems.forEach(function(item) {
+            item.addEventListener('mouseenter', function() {
+                this.style.paddingLeft = '1rem';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.paddingLeft = '0.75rem';
+            });
+        });
+    });
+    </script>
+
+</body>
+</html>

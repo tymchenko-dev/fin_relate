@@ -1,0 +1,764 @@
+{% extends "layout.html" %}
+{% block title %}Settings - FinRelate{% endblock %}
+{% block content %}
+    <div class="dashboard-layout d-flex">
+        <!-- Sidebar -->
+        <nav id="modernSidebar" class="sidebar bg-dark text-white">
+            <div class="sidebar-header d-flex align-items-center justify-content-between px-3 py-2">
+                <span class="fs-4 fw-bold">FinRelate</span>
+                <button class="btn btn-sm btn-outline-light" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            </div>
+            <ul class="nav flex-column mt-4">
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white" href="{{ url_for('main.dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white" href="{{ url_for('main.stats') }}">
+                        <i class="fas fa-chart-bar me-2"></i>Statistics
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white" href="{{ url_for('main.notifications') }}">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white active" href="{{ url_for('main.settings') }}">
+                        <i class="fas fa-cog me-2"></i>Settings
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white" href="{{ url_for('main.receipt_scanner') }}">
+                        <i class="fas fa-camera me-2"></i>Receipt Scanner
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white" href="{{ url_for('main.smart_insights') }}">
+                        <i class="fas fa-brain me-2"></i>Smart Insights
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- Main Content Area -->
+        <div class="main-content flex-grow-1">
+            <div class="container-fluid py-4">
+                <div class="row g-4 mb-5">
+                <nav id="modernSidebar" class="sidebar bg-dark text-white">
+                    <div class="sidebar-header d-flex align-items-center px-3 py-3">
+                        <img src="{{ url_for('static', filename='Logotip.png') }}" alt="FinRelate Logo" style="width: 40px; height: 40px; margin-right: 10px;">
+                                <div class="card-change positive">
+                                </div>
+                            </div>
+                        </div>
+                                <i class="fas fa-palette me-2"></i>Dashboard
+                </div>
+                <div class="col-md-4">
+                    <div class="setting-item d-flex align-items-center justify-content-between">
+                        <div>
+                                <i class="fas fa-chart-bar me-2"></i>Statistics
+                            <p style="color:#fff;">Download your financial data in various formats</p>
+                        </div>
+                        <div class="export-buttons d-flex gap-3">
+                            <a href="{{ url_for('main.export_transactions') }}" class="btn btn-light" download>
+                                <i class="fas fa-chart-line me-2"></i>Financial Analytics
+                            </a>
+                            <a href="{{ url_for('main.export_excel') }}" class="btn btn-light" download>
+                                <i class="fas fa-file-excel me-1"></i>Excel
+                            </a>
+                                <i class="fas fa-tags me-2"></i>Categories
+                                <i class="fas fa-file-pdf me-1"></i>PDF
+                            </a>
+                        </div>
+                    </div>
+                                <i class="fas fa-bullseye me-2"></i>Budget Goals
+                </div>
+                <div class="col-md-4">
+                    <div class="overview-card">
+                        <div class="card-content">
+                                <i class="fas fa-trophy me-2"></i>Achievements
+                                <h6 class="card-subtitle">Security</h6>
+                                <div class="card-value">Strong</div>
+                                <div class="card-change positive">
+                                </div>
+                                <i class="fas fa-bell me-2"></i>Notifications
+                        </div>
+                    </div>
+                </div>
+<style>
+                                <i class="fas fa-cog me-2"></i>Settings
+    .category-name, .category-description {
+        color: #222 !important;
+    }
+    /* Sidebar gradient fix */
+    .sidebar {
+        background: linear-gradient(180deg, #2C5282 0%, #7AC3AA 100%) !important;
+        color: #fff !important;
+        min-height: 100vh;
+    }
+    /* Profile Settings value color override */
+                                <i class="fas fa-camera me-2"></i>Receipt Scanner
+        color: #fff !important;
+    }
+    /* ... All CSS from both style blocks merged here ... */
+    .white-title {
+                                <i class="fas fa-brain me-2"></i>Smart Insights
+        font-weight: 700;
+        text-shadow: 0 1px 6px rgba(44,82,130,0.18);
+    }
+                    <div class="sidebar-footer mt-auto px-3 pb-3">
+                        <div class="user-info d-flex align-items-center">
+                            <span class="user-avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2" style="width:32px;height:32px;">
+                                <i class="fas fa-user text-white"></i>
+                            </span>
+                            <div class="user-details">
+                                <div class="username fw-bold">{{ current_user.username }}</div>
+                                <div class="text-success small">Online</div>
+                            </div>
+                            <a href="{{ url_for('auth.logout') }}" class="logout-btn ms-auto btn btn-outline-light btn-sm" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+        /* Make notification/data subtitles and descriptions white */
+        .card-subtitle,
+        .setting-description,
+        .notification-title,
+        .data-title {
+            color: #fff !important;
+            opacity: 1 !important;
+            text-shadow: 0 1px 6px rgba(44,82,130,0.18);
+        }
+    /* Hide the main navbar and flash messages for dashboard consistency */
+    .navbar { display: none !important; }
+    .container-fluid .alert { display: none !important; }
+    main.container-fluid { padding: 0 !important; margin: 0 !important; }
+    body { overflow-x: hidden; background: linear-gradient(180deg, #2C5282 0%, #7AC3AA 100%) !important; min-height: 100vh; }
+    .dashboard-layout { background: none !important; }
+
+    /* Card and section backgrounds - unify all cards to gradient/colored backgrounds */
+    .overview-card,
+    .budget-card,
+    .insights-card,
+    .modern-card,
+    .danger-card,
+    .language-section,
+    .categories-list,
+    .settings-group,
+    .card-header,
+    .card-body {
+        background: linear-gradient(135deg, #2C5282 0%, #7AC3AA 100%) !important;
+        color: #b2f2e9 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 2px 12px rgba(44,82,130,0.08);
+        border: none !important;
+    }
+
+    /* Revert card backgrounds for Profile Settings and App Preferences */
+    .budget-card,
+    .insights-card {
+        background: linear-gradient(135deg, #2C5282 0%, #7AC3AA 100%) !important;
+        color: #b2f2e9 !important;
+    }
+
+    /* Make only the titles green */
+    .budget-title,
+    .insights-title {
+        color: #5fd3b3 !important;
+    }
+
+    /* Remove white backgrounds from all cards and sections */
+    .overview-card,
+    .budget-card,
+    .insights-card,
+    .modern-card,
+    .danger-card,
+    .language-section,
+    .categories-list,
+    .settings-group {
+        background-color: transparent !important;
+    }
+
+    /* Remove white backgrounds from form elements */
+    .form-control,
+    .form-select,
+    .modern-input {
+        background: rgba(44,82,130,0.12) !important;
+        color: #fff !important;
+        border: 1px solid #7AC3AA !important;
+        border-radius: 8px !important;
+    }
+
+    /* Button backgrounds */
+    .btn,
+    .btn-primary-gradient,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-danger,
+    .btn-outline-success,
+    .btn-outline-info {
+        border-radius: 8px !important;
+    }
+
+    /* Danger zone card gradient - remove red border, keep gradient background */
+    .danger-card {
+        background: linear-gradient(135deg, #e53935 0%, #e35d5b 100%) !important;
+        color: #fff !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    /* Footer background */
+    footer {
+        background: linear-gradient(90deg, #2C5282 0%, #7AC3AA 100%) !important;
+        color: #fff !important;
+    }
+
+    /* Remove box-shadow from white cards if any */
+    .card,
+    .card-content {
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    /* Misc fixes for white backgrounds */
+    .main-content,
+    .dashboard-container {
+        background: none !important;
+    }
+        /* Currency selector styles */
+        .currency-selector {
+            display: flex;
+            gap: 16px;
+        }
+        .currency-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            padding: 8px 24px;
+            border-radius: 24px;
+            font-size: 1.2em;
+            font-weight: 600;
+            background: #7AC3AA;
+            color: #fff;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44,82,130,0.08);
+            transition: background 0.2s, color 0.2s;
+        }
+        .currency-option.active {
+            background: #5fd3b3;
+            color: #fff;
+        }
+        .currency-option img, .currency-option svg {
+            margin-right: 8px;
+            height: 20px;
+            width: 28px;
+        }
+</style>
+
+<!-- Dashboard Layout with Sidebar -->
+<div class="dashboard-layout d-flex">
+    <!-- Sidebar -->
+    <nav id="modernSidebar" class="sidebar bg-dark text-white">
+        <div class="sidebar-header d-flex align-items-center justify-content-between px-3 py-2">
+            <span class="fs-4 fw-bold">FinRelate</span>
+            <button class="btn btn-sm btn-outline-light" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+        </div>
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" href="{{ url_for('main.dashboard') }}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" href="{{ url_for('main.stats') }}">
+                    <i class="fas fa-chart-bar me-2"></i>Statistics
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" href="{{ url_for('main.notifications') }}">
+                    <i class="fas fa-bell me-2"></i>Notifications
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white active" href="{{ url_for('main.settings') }}">
+                    <i class="fas fa-cog me-2"></i>Settings
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" href="{{ url_for('main.receipt_scanner') }}">
+                    <i class="fas fa-camera me-2"></i>Receipt Scanner
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" href="{{ url_for('main.smart_insights') }}">
+                    <i class="fas fa-brain me-2"></i>Smart Insights
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <!-- Main Content Area -->
+    <div class="main-content flex-grow-1">
+        <div class="dashboard-container">
+            <!-- Modern Dashboard Header -->
+            <div class="modern-dashboard-header">
+                <div class="container-fluid">
+                    <div class="row align-items-center py-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <button class="sidebar-toggle-btn me-3" id="sidebarToggle">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                                <div class="welcome-section">
+                                    <h1 class="welcome-title">
+                                        <span class="greeting">Hello</span>
+                                        <span class="username">{{ current_user.username }}</span>
+                                    </h1>
+                                    <p class="welcome-subtitle">
+                                        <i class="fas fa-cog me-2"></i>
+                                        Manage your account preferences and application settings
+                                    </p>
+                                    <div class="quick-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-value">{{ categories|length if categories else 0 }}</span>
+                                        <div class="col-md-4">
+                                            <div class="setting-item d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h4 style="color:#fff;">Export Your Data</h4>
+                                                    <p style="color:#fff;">Download your financial data in various formats</p>
+                                                </div>
+                                                <div class="export-buttons d-flex gap-3">
+                                                    <a href="{{ url_for('main.export_transactions') }}" class="btn btn-light" download>
+                                                        <i class="fas fa-file-csv me-1"></i>CSV
+                                                    </a>
+                                                    <a href="{{ url_for('main.export_excel') }}" class="btn btn-light" download>
+                                                        <i class="fas fa-file-excel me-1"></i>Excel
+                                                    </a>
+                                                    <a href="{{ url_for('main.export_pdf') }}" class="btn btn-light" download>
+                                                        <i class="fas fa-file-pdf me-1"></i>PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <i class="fas fa-plus"></i>Manage
+            .category-name, .category-description {
+                color: #222 !important;
+            }
+            /* Profile Settings value color override */
+            .white-title {
+                font-weight: 700;
+                text-shadow: 0 1px 6px rgba(44,82,130,0.18);
+            }
+            /* Make notification/data subtitles and descriptions white */
+            .card-subtitle,
+            .setting-description,
+            .notification-title,
+            .data-title {
+                color: #fff !important;
+                opacity: 1 !important;
+                text-shadow: 0 1px 6px rgba(44,82,130,0.18);
+            }
+            /* Sidebar gradient fix */
+            .sidebar {
+                background: linear-gradient(180deg, #2C5282 0%, #7AC3AA 100%) !important;
+                color: #fff !important;
+                min-height: 100vh;
+            }
+                <div class="col-md-4">
+                                        <div class="setting-item d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <h4 style="color:#fff;">Export Your Data</h4>
+                                                <p style="color:#fff;">Download your financial data in various formats</p>
+                                            </div>
+                                            <div class="export-buttons d-flex gap-3">
+                                                <a href="{{ url_for('main.export_transactions') }}" class="btn btn-light" download>
+                                                    <i class="fas fa-file-csv me-1"></i>CSV
+                                                </a>
+                                                <a href="{{ url_for('main.export_excel') }}" class="btn btn-light" download>
+                                                    <i class="fas fa-file-excel me-1"></i>Excel
+                                                </a>
+                                                <a href="{{ url_for('main.export_pdf') }}" class="btn btn-light" download>
+                                                    <i class="fas fa-file-pdf me-1"></i>PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    <i class="fas fa-plus"></i>Manage
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="overview-card">
+                        <div class="card-content">
+                            <div class="card-header-info">
+                                <h6 class="card-subtitle">Security</h6>
+                                <div class="card-value">Strong</div>
+                                <div class="card-change positive">
+                                    <i class="fas fa-shield-alt"></i>Protected
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="container-fluid px-4 pb-4">
+                <div class="row">
+                    <!-- Profile Settings Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="budget-card">
+                            <div class="budget-header">
+                                <h5 class="budget-title">
+                                    <i class="fas fa-user-circle me-2"></i>
+                                    Profile Settings
+                                </h5>
+                            </div>
+                            <div class="budget-content">
+                                <div class="budget-item">
+                                    <div class="budget-info">
+                                        <span class="budget-category">Username</span>
+                                        <span class="budget-amount profile-value">{{ current_user.username }}</span>
+                                    </div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-info">
+                                        <span class="budget-category">Email</span>
+                                        <span class="budget-amount profile-value">{{ current_user.email or 'demo@finrelate.com' }}</span>
+                                    </div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-info">
+                                        <span class="budget-category">Password</span>
+                                        <button class="btn btn-primary-gradient btn-sm" onclick="showPasswordModal()">
+                                            <i class="fas fa-key me-1"></i>
+                                            Change
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- App Preferences Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="insights-card">
+                            <div class="insights-header">
+                                <h5 class="insights-title">
+                                    <i class="fas fa-sliders-h me-2"></i>
+                                    App Preferences
+                                </h5>
+                            </div>
+                            <div class="insights-content">
+                                <div class="insight-item">
+                                    <i class="fas fa-moon insight-icon"></i>
+                                    <div class="insight-text">
+                                        <strong>Dark Theme:</strong>
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input theme-toggle" type="checkbox" id="darkMode">
+                                            <label class="form-check-label text-white" for="darkMode">Enable dark mode</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="insight-item">
+                                    <i class="fas fa-dollar-sign insight-icon"></i>
+                                    <div class="insight-text">
+                                        <strong>Currency:</strong>
+                                        <div class="currency-selector mt-2">
+                                            <div class="currency-option active" data-currency="USD">
+                                                <span class="currency-flag">🇺🇸</span>
+                                                <span class="currency-code">USD</span>
+                                            </div>
+                                            <div class="currency-option" data-currency="EUR">
+                                                <span class="currency-flag">🇪🇺</span>
+                                                <span class="currency-code">EUR</span>
+                                            </div>
+                                            <div class="currency-option" data-currency="GBP">
+                                                <span class="currency-flag">🇬🇧</span>
+                                                <span class="currency-code">GBP</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="insight-item">
+                                    <i class="fas fa-bell insight-icon" style="color: #7fffd4;"></i>
+                                    <div class="insight-text">
+                                        <strong>Notifications:</strong>
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input theme-toggle" type="checkbox" id="notifications" checked>
+                                            <label class="form-check-label text-white" for="notifications">Enable push notifications</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="language-section">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Language</label>
+                            <p class="setting-description">Select your language</p>
+                        </div>
+                        <div class="setting-control">
+                            <select class="form-select modern-input">
+                                <option value="en" selected>English</option>
+                                <option value="ru">Русский</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Budget Settings Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="modern-card h-100">
+                            <div class="card-header gradient-header">
+                                <div class="card-header-content">
+                                    <h3 class="card-title green-title">
+                                        <i class="fas fa-wallet me-2"></i>
+                                        Budget Settings
+                                    </h3>
+                                    <p class="card-subtitle white-desc">SET YOUR FINANCIAL GOALS AND LIMITS</p>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-group">
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <label class="setting-label white-title">Monthly Budget</label>
+                                            <p class="setting-description white-desc">Set your total monthly spending limit</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" class="form-control modern-input" value="2000" placeholder="Enter amount">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <label class="setting-label white-title">Budget Alerts</label>
+                                            <p class="setting-description white-desc">Get notified when approaching budget limits</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <div class="alert-percentage">
+                                                <span class="alert-label">Alert at</span>
+                                                <input type="range" class="form-range" min="50" max="95" value="80" id="budgetAlert">
+                                                <span class="alert-value">80%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categories Management Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="modern-card h-100">
+                            <div class="card-header gradient-header">
+                                <div class="card-header-content">
+                                    <h3 class="card-title green-title">
+                                        <i class="fas fa-tags me-2"></i>
+                                        Categories Management
+                                    </h3>
+                                    <p class="card-subtitle white-desc">MANAGE YOUR EXPENSE CATEGORIES</p>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-outline-light btn-sm" onclick="showAddCategoryModal()">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Add Category
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="categories-list">
+                                    {% for category in categories %}
+                                    <div class="category-item">
+                                        <div class="category-icon" style="background-color: {{ category.color or '#007bff' }};">
+                                            <i class="fas fa-{{ category.icon or 'shopping-cart' }}"></i>
+                                        </div>
+                                        <div class="category-info">
+                                            <h6 class="category-name">{{ category.name }}</h6>
+                                            <small class="category-description">{{ category.description or 'No description' }}</small>
+                                        </div>
+                                        <div class="category-actions">
+                                            <button class="btn btn-outline-primary btn-xs" onclick="editCategory({{ category.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-xs ms-1" onclick="deleteCategory({{ category.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Notifications Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="modern-card h-100">
+                            <div class="card-header gradient-header">
+                                <div class="card-header-content">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-bell me-2" style="color: #7fffd4;"></i>
+                                        <span class="notification-title">Notification Settings</span>
+                                    </h3>
+                                    <p class="card-subtitle">Control what notifications you receive</p>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-group">
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <label class="setting-label" style="color: #fff;">Browser Notifications</label>
+                                            <p class="setting-description">Receive notifications in your browser</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="browserNotifications" checked>
+                                                <label class="form-check-label" for="browserNotifications"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <label class="setting-label" style="color: #fff;">Daily Summary</label>
+                                            <p class="setting-description">Get daily spending summaries</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="dailySummary" checked>
+                                                <label class="form-check-label" for="dailySummary"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <label class="setting-label" style="color: #fff;">Financial Reports</label>
+                                            <p class="setting-description">Receive weekly financial reports</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="financialReports">
+                                                <label class="form-check-label" for="financialReports"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Management Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="modern-card h-100">
+                            <div class="card-header gradient-header">
+                                <div class="card-header-content">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-database me-2" style="color: #7fffd4;"></i>
+                                        <span class="data-title">Data Management</span>
+                                    </h3>
+                                    <p class="card-subtitle">Export or manage your financial data</p>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-group">
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <label class="setting-label" style="color: #fff;">Export Your Data</label>
+                                            <p class="setting-description">Download your financial data in various formats</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <div class="export-buttons">
+                                                <a href="{{ url_for('main.export_transactions') }}" class="btn btn-outline-success btn-sm" download>
+                                                    <i class="fas fa-file-csv me-1"></i>
+                                                    CSV
+                                                </a>
+                                                <a href="{{ url_for('main.export_excel') }}" class="btn btn-outline-primary btn-sm ms-2" download>
+                                                    <i class="fas fa-file-excel me-1" style="color: #222;"></i>
+                                                    <span style="color: #222;">Excel</span>
+                                                </a>
+                                                <a href="{{ url_for('main.export_pdf') }}" class="btn btn-outline-info btn-sm ms-2" download>
+                                                    <i class="fas fa-file-pdf me-1"></i>
+                                                    PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone Card -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="modern-card danger-card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="danger-action">
+                                            <h6 class="danger-title" style="font-size: 1.25rem; color: #fff;">Delete All Data</h6>
+                                            <p class="danger-description" style="font-size: 1.15rem; color: #fff;">Permanently delete all your financial data</p>
+                                            <button class="btn btn-danger btn-sm" onclick="showDeleteDataModal()">
+                                                <i class="fas fa-trash me-1"></i>
+                                                Delete All Data
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="danger-action">
+                                            <h6 class="danger-title" style="font-size: 1.25rem; color: #fff;">Delete Account</h6>
+                                            <p class="danger-description" style="font-size: 1.15rem; color: #fff;">Permanently delete your account and all data</p>
+                                            <button class="btn btn-danger btn-sm" onclick="showDeleteAccountModal()">
+                                                <i class="fas fa-user-times me-1"></i>
+                                                Delete Account
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const fixedSidebarToggle = document.getElementById('fixedSidebarToggle');
+    const sidebar = document.getElementById('modernSidebar');
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.toggle('collapsed');
+            document.body.classList.toggle('sidebar-collapsed');
+        });
+    }
+    if (fixedSidebarToggle && sidebar) {
+        fixedSidebarToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.toggle('collapsed');
+            document.body.classList.toggle('sidebar-collapsed');
+        });
+    }
+});
+</script>
+{% endblock %}

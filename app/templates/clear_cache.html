@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Очистка кеша FinRelate</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            padding: 2rem; 
+            background: #f8f9fa;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 12px;
+        }
+        .btn { 
+            background: #7AC3AA; 
+            color: white; 
+            border: none; 
+            padding: 1rem 2rem; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+        .status { 
+            padding: 1rem; 
+            margin: 1rem 0; 
+            border-radius: 8px; 
+        }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Очистка кеша FinRelate</h1>
+        <p>Эта страница поможет очистить Service Worker кеш и показать новый дизайн FinRelate.</p>
+        
+        <div id="status" class="status info">
+            Проверка Service Worker...
+        </div>
+        
+        <button class="btn" onclick="clearCache()">Очистить кеш</button>
+        <button class="btn" onclick="location.href='http://127.0.0.1:5002/'" 
+                style="background: #28a745;">Перейти на главную</button>
+        
+        <h3>Что произошло:</h3>
+        <ul>
+            <li>✅ Service Worker кешировал старую версию с названием "Expense Tracker"</li>
+            <li>✅ Мы обновили кеш на "FinRelate" с новой версией</li>
+            <li>✅ Старый кеш будет автоматически удален</li>
+        </ul>
+    </div>
+
+    <script>
+        async function clearCache() {
+            const status = document.getElementById('status');
+            
+            try {
+                // Unregister service worker
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                        console.log('Service Worker unregistered');
+                    }
+                }
+                
+                // Clear all caches
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(cacheName => {
+                        console.log('Deleting cache:', cacheName);
+                        return caches.delete(cacheName);
+                    })
+                );
+                
+                status.className = 'status success';
+                status.innerHTML = '✅ Кеш успешно очищен! Теперь обновите главную страницу.';
+                
+                // Auto refresh after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'http://127.0.0.1:5002/';
+                }, 2000);
+                
+            } catch (error) {
+                status.className = 'status error';
+                status.innerHTML = '❌ Ошибка: ' + error.message;
+            }
+        }
+
+        // Auto run on page load
+        window.addEventListener('load', () => {
+            const status = document.getElementById('status');
+            if ('serviceWorker' in navigator) {
+                status.innerHTML = '🔍 Service Worker найден. Нажмите "Очистить кеш" для обновления.';
+            } else {
+                status.innerHTML = '✅ Service Worker не найден. Кеширование отключено.';
+            }
+        });
+    </script>
+</body>
+</html>

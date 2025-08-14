@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinRelate Test - Clean Version</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #F8FFFE 0%, #ffffff 100%);
+            margin: 0;
+            padding: 0;
+            color: #2D3748;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #7AC3AA;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .chart-icon {
+            width: 50px;
+            height: 50px;
+            background: #7AC3AA;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+        
+        .test-info {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .timestamp {
+            color: #7AC3AA;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(122, 195, 170, 0.1);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #7AC3AA 0%, #68B39A 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #48BB78 0%, #38A169 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            margin: 2rem 0;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="chart-icon">📊</div>
+                FinRelate
+            </div>
+            <p class="subtitle">Современная платформа управления личными финансами</p>
+        </div>
+        
+        <div class="test-info">
+            <h2>🎉 Успешно обновлено!</h2>
+            <p>Если вы видите эту страницу, то обновление сработало!</p>
+            <p class="timestamp">Время создания: <span id="timestamp"></span></p>
+            <div class="success-message">
+                ✅ FinRelate успешно заменил Expense Tracker
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Умная аналитика</h3>
+                <p>Подробная информация о ваших тратах с интерактивными графиками</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Безопасность</h3>
+                <p>Ваши финансовые данные защищены банковским уровнем шифрования</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Мобильная версия</h3>
+                <p>Доступ к финансам в любом месте с адаптивным дизайном</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('ru-RU');
+    </script>
+</body>
+</html>

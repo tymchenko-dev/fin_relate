@@ -1,93 +1,232 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinRelate - Smart Money Management</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+            min-height: 100vh !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            color: #2D3748 !important;
+        }
+        
+        .main-container {
+            min-height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 2rem 1rem !important;
+        }
+        
+        .content-card {
+            background: white !important;
+            border-radius: 20px !important;
+            padding: 3rem 2rem !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+            max-width: 500px !important;
+            width: 100% !important;
+            text-align: center !important;
+        }
+        
+        .logo-section {
+            margin-bottom: 2rem !important;
+        }
+        
+        .logo-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 1rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .logo-icon {
+            width: 80px !important;
+            height: 80px !important;
+            background: linear-gradient(135deg, #7AC3AA, #9DD2BB) !important;
+            border-radius: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .logo-text {
+            font-size: 2.5rem !important;
+            font-weight: 700 !important;
+            color: #2D3748 !important;
+        }
+        
+        .tagline {
+            color: #718096 !important;
+            font-size: 1rem !important;
+            margin-bottom: 2rem !important;
+        }
+        
+        .auth-section {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 1rem !important;
+            margin-bottom: 2rem !important;
+        }
+        
+        .btn-login {
+            background: #4285f4 !important;
+            color: white !important;
+            padding: 1rem 2rem !important;
+            border-radius: 12px !important;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+            border: none !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .btn-signup {
+            background: #48BB78 !important;
+            color: white !important;
+            padding: 1rem 2rem !important;
+            border-radius: 12px !important;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+            border: none !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .btn-login:hover, .btn-signup:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            color: white !important;
+        }
+        
+        .features-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 1rem !important;
+            margin-top: 2rem !important;
+        }
+        
+        .feature-item {
+            padding: 1rem !important;
+            background: #f8f9fa !important;
+            border-radius: 10px !important;
+            font-size: 0.9rem !important;
+            color: #718096 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .logo-icon { width: 60px !important; height: 60px !important; }
+            .logo-text { font-size: 2rem !important; }
+            .content-card { padding: 2rem 1.5rem !important; margin: 1rem !important; }
+            .features-grid { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="content-card">
+            <!-- FinRelate Logo Section -->
+            <div class="logo-section">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 3v18h18v-2H5V3H3zm4 14h2v-8H7v8zm4 0h2V7h-2v10zm4 0h2V5h-2v12z"/>
+                        </svg>
+                    </div>
+                    <span class="logo-text">FinRelate</span>
+                </div>
+                <p class="tagline">Smart money management starts here</p>
+            </div>
 
-{% block title %}Home - Expense Tracker{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-lg-6 mx-auto">
-        <div class="text-center">
-            <h1 class="display-4 text-primary mb-4">
-                <i class="fas fa-wallet me-3"></i>Expense Tracker
-            </h1>
-            <p class="lead text-muted mb-4">
-                Simple and convenient tool for personal finance management
-            </p>
-            
             {% if current_user.is_authenticated %}
-                <div class="card p-4 mb-4">
-                    <h3>Welcome, {{ current_user.username }}!</h3>
-                    <p class="text-muted">Go to the dashboard to manage your finances</p>
-                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                    </a>
-                </div>
+                <!-- Authenticated User Welcome -->
+                <h2 style="color: #2D3748; margin-bottom: 1rem;">Welcome back, {{ current_user.username }}!</h2>
+                <p style="color: #718096; margin-bottom: 2rem;">Ready to manage your finances?</p>
+                <a href="{{ url_for('main.dashboard') }}" class="btn-login" style="display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Go to Dashboard
+                </a>
             {% else %}
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="card h-100 p-4">
-                            <h5 class="card-title">
-                                <i class="fas fa-user-plus text-success me-2"></i>New user?
-                            </h5>
-                            <p class="card-text text-muted">Create an account and start controlling your expenses</p>
-                            <a href="{{ url_for('auth.register') }}" class="btn btn-success">
-                                Register
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card h-100 p-4">
-                            <h5 class="card-title">
-                                <i class="fas fa-sign-in-alt text-primary me-2"></i>Already have an account?
-                            </h5>
-                            <p class="card-text text-muted">Login to access your data</p>
-                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
-                                Login
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <!-- Guest Authentication Options -->
+                <h2 style="color: #2D3748; margin-bottom: 1rem;">Welcome to FinRelate</h2>
+                <p style="color: #718096; margin-bottom: 2rem;">Take control of your financial future</p>
             {% endif %}
         </div>
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<!-- Features Section - Show for all users -->
+<div class="features-section" style="padding: 5rem 0; background: white;">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title" style="font-size: 2.5rem; font-weight: 700; color: #2D3748; margin-bottom: 1rem;">Smart Money Management</h2>
+            <p class="section-subtitle" style="font-size: 1.2rem; color: #718096; max-width: 600px; margin: 0 auto; line-height: 1.6;">Discover our key features designed to give you clarity and control over your finances.</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card" style="background: #fafbfc; border-radius: 16px; padding: 2rem 1.5rem; text-align: center; transition: all 0.3s ease; border: 1px solid #E2E8F0; height: 100%;">
+                    <div class="feature-icon feature-icon-budgeting" style="width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); color: #0369a1;">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h5 class="feature-title" style="font-size: 1.25rem; font-weight: 600; color: #2D3748; margin-bottom: 1rem;">Smart Budgeting</h5>
+                        <p class="feature-description" style="color: #718096; line-height: 1.6; margin: 0; font-size: 0.95rem;">Create personalized budgets that adapt to your spending habits. Track progress and receive alerts when nearing limits.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card" style="background: #fafbfc; border-radius: 16px; padding: 2rem 1.5rem; text-align: center; transition: all 0.3s ease; border: 1px solid #E2E8F0; height: 100%;">
+                    <div class="feature-icon feature-icon-insights" style="width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #d97706;">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h5 class="feature-title" style="font-size: 1.25rem; font-weight: 600; color: #2D3748; margin-bottom: 1rem;">AI-Powered Insights</h5>
+                        <p class="feature-description" style="color: #718096; line-height: 1.6; margin: 0; font-size: 0.95rem;">Get actionable insights into your financial health. Understand spending patterns and identify improvement areas.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card" style="background: #fafbfc; border-radius: 16px; padding: 2rem 1.5rem; text-align: center; transition: all 0.3s ease; border: 1px solid #E2E8F0; height: 100%;">
+                    <div class="feature-icon feature-icon-tracking" style="width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a;">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h5 class="feature-title" style="font-size: 1.25rem; font-weight: 600; color: #2D3748; margin-bottom: 1rem;">Investment Tracking</h5>
+                        <p class="feature-description" style="color: #718096; line-height: 1.6; margin: 0; font-size: 0.95rem;">Monitor your investment portfolio in real-time. Track performance, analyze returns, and stay on top of your goals.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card" style="background: #fafbfc; border-radius: 16px; padding: 2rem 1.5rem; text-align: center; transition: all 0.3s ease; border: 1px solid #E2E8F0; height: 100%;">
+                    <div class="feature-icon feature-icon-security" style="width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); color: #be185d;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h5 class="feature-title" style="font-size: 1.25rem; font-weight: 600; color: #2D3748; margin-bottom: 1rem;">Secure Transactions</h5>
+                        <p class="feature-description" style="color: #718096; line-height: 1.6; margin: 0; font-size: 0.95rem;">Enjoy peace of mind with our secure transaction platform. Your financial data is protected with advanced encryption.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Features block -->
-<div class="row mt-5">
-    <div class="col-12">
-        <h2 class="text-center mb-4">Application Features</h2>
-    </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center p-4">
-            <div class="card-body">
-                <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Income & Expense Tracking</h5>
-                <p class="card-text text-muted">
-                    Add income and expenses with categories and descriptions
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center p-4">
-            <div class="card-body">
-                <i class="fas fa-chart-pie fa-3x text-warning mb-3"></i>
-                <h5 class="card-title">Visual Statistics</h5>
-                <p class="card-text text-muted">
-                    View charts of expenses by categories and time periods
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center p-4">
-            <div class="card-body">
-                <i class="fas fa-tags fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Categories</h5>
-                <p class="card-text text-muted">
-                    Organize expenses by categories: food, transport, entertainment and others
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact FinRelate">
+    <title>Contact - FinRelate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='finrelate.css') }}">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, #2C5282 0%, #7AC3AA 100%) !important;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255,255,255,0.04);
+            border-radius: 24px;
+            box-shadow: 0 2px 16px rgba(44,82,130,0.10);
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        h1, h2, h3 {
+            color: #7AC3AA;
+            font-weight: 800;
+        }
+        p, li {
+            color: #fff;
+            opacity: 0.92;
+        }
+        label.form-label {
+            color: #fff;
+            opacity: 0.92;
+            background: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+        }
+        .contact-info {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-control {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: none;
+        }
+        .form-control:focus {
+            background: rgba(255,255,255,0.16);
+            color: #fff;
+            border: 1px solid #7AC3AA;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background: #7AC3AA;
+            border: none;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: #68B39A;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='new-logo.png') }}" alt="FinRelate Logo" style="width: 32px; height: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(122,195,170,0.18);">
+                FinRelate
+            </a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="mb-4">Contact Us</h1>
+        <p>We’re here to help and would love to hear from you.<br>
+        Whether you have questions, need assistance, want to share your feedback, or suggest improvements — feel free to reach out. Our team will do its best to respond promptly.</p>
+        <hr>
+        <h2>Contact Information</h2>
+        <ul class="list-unstyled contact-info mb-3">
+            <li>📧 <strong>Email:</strong> <a href="mailto:timjob48@gmail.com" style="color:#A3E9D3;">timjob48@gmail.com</a></li>
+            <li>📞 <strong>Phone:</strong> <a href="tel:+41797061420" style="color:#A3E9D3;">+41 79 706 14 20</a></li>
+            <li>📍 <strong>Location:</strong> Vevey, Switzerland</li>
+        </ul>
+        <hr>
+        <h2>Contact Form</h2>
+        <p>You can also use the form below to get in touch with us:</p>
+        <form id="contactForm" onsubmit="event.preventDefault(); document.getElementById('form-success').style.display='block'; this.reset();">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Enter your name" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+            </div>
+            <div class="mb-3">
+                <label for="subject" class="form-label">Subject</label>
+                <input type="text" class="form-control" id="subject" placeholder="Subject" required>
+            </div>
+            <div class="mb-3">
+                <label for="message" class="form-label">Message</label>
+                <textarea class="form-control" id="message" rows="4" placeholder="Type your message" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+        <div id="form-success" class="alert alert-success mt-3" style="display:none;">Message sent successfully!</div>
+        <hr>
+        <h2>Social Media</h2>
+        <p>You can also connect with us through our social media profiles or messaging platforms:</p>
+        <div class="d-flex gap-2 mb-3">
+            <a href="https://www.linkedin.com/in/vladyslav-tymchenko-6686bb311/" class="footer-social-link" aria-label="LinkedIn" target="_blank" rel="noopener" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s, color 0.2s;"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://github.com/tymchenko-dev" class="footer-social-link" aria-label="GitHub" target="_blank" rel="noopener" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s, color 0.2s;"><i class="fab fa-github"></i></a>
+        </div>
+        
+    </div>
+    <footer class="modern-footer" style="background: linear-gradient(135deg, #1A365D 0%, #68B39A 100%) !important; color: #fff !important; border-top: 1px solid rgba(122,195,170,0.18); box-shadow: 0 -4px 24px rgba(122,195,170,0.12); border-radius: 0 0 24px 24px;">
+        <div class="container py-4">
+            <div class="row align-items-center mb-3">
+                <div class="col-md-3 d-flex align-items-center gap-2">
+                    <img src="{{ url_for('static', filename='new-logo.png') }}" alt="FinRelate Logo" style="width: 28px; height: 28px; border-radius: 8px; box-shadow: 0 2px 8px rgba(122,195,170,0.18);">
+                    <span style="font-size: 1.1rem; font-weight: 700; color: #A3E9D3; text-shadow: 0 2px 8px rgba(122,195,170,0.18);">FinRelate</span>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center gap-2">
+                    <a href="/" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Home</a>
+                    <a href="/privacy-policy" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Privacy Policy</a>
+                    <a href="/terms" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Terms</a>
+                    <a href="/contact" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Contact</a>
+                </div>
+                <div class="col-md-3 d-flex justify-content-end gap-2">
+                    <a href="https://www.linkedin.com/in/vladyslav-tymchenko-6686bb311/" class="footer-social-link" aria-label="LinkedIn" target="_blank" rel="noopener" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background 0.2s, color 0.2s;"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://github.com/tymchenko-dev" class="footer-social-link" aria-label="GitHub" target="_blank" rel="noopener" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background 0.2s, color 0.2s;"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.12);">
+            <div class="row">
+                <div class="col-md-8 d-flex align-items-center">
+                    <span style="font-size: 1rem; color: #fff; opacity: 0.92;">© 2024 FinRelate. All rights reserved.</span>
+                </div>
+                <div class="col-md-4 d-flex align-items-center justify-content-end">
+                    <span style="font-size: 1rem; color: #fff; opacity: 0.92; white-space: nowrap;"><i class="fas fa-robot me-2" style="font-size: 1rem;"></i> Data-driven financial insights powered by AI.</span>
+                </div>
+            </div>
+        </div>
+        <style>
+            .footer-nav-link:hover {
+                background: rgba(255,255,255,0.22) !important;
+                color: #A3E9D3 !important;
+            }
+            .footer-social-link:hover {
+                background: #A3E9D3 !important;
+                color: #1A365D !important;
+            }
+            .footer-social-link i,
+            .footer-social-link {
+                text-decoration: none !important;
+                border-bottom: none !important;
+            }
+        </style>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

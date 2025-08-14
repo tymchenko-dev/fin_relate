@@ -14,37 +14,269 @@ from app.models import (User, Transaction, Category, create_default_categories,
                        analyze_spending_patterns, generate_smart_recommendations)
 from app.forms import LoginForm, RegisterForm, TransactionForm, CategoryForm
 
-# Создание blueprints
+ # Create blueprints
 main = Blueprint('main', __name__)
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
 # Main routes
+@main.route('/terms')
+def terms():
+    return render_template('terms.html')
+@main.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy_policy.html')
+@main.route('/contact')
+def contact():
+    return render_template('contact.html')
 @main.route('/')
 def index():
     """Home page"""
-    return render_template('index.html')
+    response = make_response(render_template('finrelate_home.html'))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+@main.route('/export_pdf')
+@login_required
+def export_pdf():
+    import io
+    from flask import send_file
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+    transactions = Transaction.query.filter_by(user_id=current_user.id).all()
+    file_stream = io.BytesIO()
+    c = canvas.Canvas(file_stream, pagesize=letter)
+    width, height = letter
+    c.setFont('Helvetica', 12)
+    y = height - 40
+    c.drawString(40, y, 'Transactions Report')
+    y -= 30
+    c.drawString(40, y, 'ID   Date   Category   Amount   Description')
+    y -= 20
+    for t in transactions:
+        line = f"{t.id}   {t.date}   {t.category.name if t.category else ''}   {t.amount}   {t.description}"
+        c.drawString(40, y, line)
+        y -= 18
+        if y < 40:
+            c.showPage()
+            y = height - 40
+    c.save()
+    file_stream.seek(0)
+    return send_file(file_stream, as_attachment=True, download_name='transactions.pdf', mimetype='application/pdf')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+@main.route('/disable-sw')
+def disable_service_worker():
+    """Disable service worker page"""
+    html_content = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Disable Service Worker</title>
+    <style>
+        body { background: #f8f9fa; }
+        .btn { margin-top: 2em; }
+    </style>
+</head>
+<body>
+    <h1>Disable Service Worker</h1>
+    <button class="btn" onclick="disableServiceWorker()">Disable Service Worker</button>
+    <script>
+    function disableServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+                alert('Service Worker disabled!');
+            });
+        }
+    }
+    </script>
+</body>
+</html>
+'''
+    response = make_response(html_content)
+    response.headers['Content-Type'] = 'text/html'
+    return response
 
 @main.route('/dashboard')
 @login_required
 def dashboard():
     """Dashboard - main user page"""
-    # Get last 10 transactions
-    recent_transactions = Transaction.query.filter_by(user_id=current_user.id)\
-                                         .order_by(Transaction.date.desc())\
-                                         .limit(10).all()
-    
-    # Get balance
-    balance = current_user.get_balance()
-    
-    # Get form for adding transaction
-    form = TransactionForm()
-    categories = Category.query.all()
-    form.category_id.choices = [(c.id, c.name) for c in categories]
-    
-    return render_template('dashboard.html', 
-                         transactions=recent_transactions, 
-                         balance=balance, 
-                         form=form)
+    try:
+        from datetime import datetime, timedelta
+        from sqlalchemy import func
+        
+        # Get last 10 transactions
+        recent_transactions = Transaction.query.filter_by(user_id=current_user.id)\
+                                             .order_by(Transaction.date.desc())\
+                                             .limit(10).all()
+        
+        # Get all transactions for calculations
+        all_transactions = Transaction.query.filter_by(user_id=current_user.id).all()
+        
+        # Calculate totals
+        total_income = sum(t.amount for t in all_transactions if t.transaction_type == 'income')
+        total_expenses = sum(t.amount for t in all_transactions if t.transaction_type == 'expense')
+        balance = current_user.get_balance()
+        
+        # Get form for adding transaction
+        form = TransactionForm()
+        categories = Category.query.all()
+        form.category_id.choices = [(c.id, c.name) for c in categories]
+        
+        # Calculate analytics data for modal
+        now = datetime.now()
+        current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # Monthly data
+        monthly_transactions = Transaction.query.filter(
+            Transaction.user_id == current_user.id,
+            Transaction.date >= current_month_start
+        ).all()
+        
+        monthly_income = sum(t.amount for t in monthly_transactions if t.transaction_type == 'income')
+        monthly_expenses = sum(t.amount for t in monthly_transactions if t.transaction_type == 'expense')
+        
+        # Transaction trends
+        transaction_count = len(all_transactions)
+        days_with_data = max(1, (now - min([t.date for t in all_transactions] + [now])).days + 1) if all_transactions else 1
+        avg_transaction = round(transaction_count / days_with_data, 1) if transaction_count > 0 else 0
+        
+        # Categories data
+        categories_data = []
+        if all_transactions:
+            from collections import defaultdict
+            category_totals = defaultdict(lambda: {'total': 0, 'count': 0, 'name': 'Unknown'})
+            
+            for transaction in all_transactions:
+                if transaction.transaction_type == 'expense':
+                    cat_name = transaction.category.name if transaction.category else 'Other'
+                    category_totals[cat_name]['total'] += transaction.amount
+                    category_totals[cat_name]['count'] += 1
+                    category_totals[cat_name]['name'] = cat_name
+            
+            # Convert to list and sort by total
+            categories_data = sorted([
+                {'name': data['name'], 'total': data['total'], 'count': data['count']}
+                for data in category_totals.values()
+            ], key=lambda x: x['total'], reverse=True)
+        
+        # Quick insights
+        savings_rate = round(((monthly_income - monthly_expenses) / monthly_income * 100), 1) if monthly_income > 0 else 0
+        daily_average = monthly_expenses / max(1, now.day) if monthly_expenses > 0 else 0
+        balance_trend = 0  # Could be calculated based on historical data
+        
+        # Debug output
+        print(f"DEBUG: monthly_income={monthly_income}, monthly_expenses={monthly_expenses}")
+        print(f"DEBUG: transaction_count={transaction_count}, avg_transaction={avg_transaction}")
+        print(f"DEBUG: categories_data={categories_data[:2] if categories_data else 'None'}")
+        
+        # Use fixed dashboard template (no Chart.js issues)
+        return render_template('dashboard_fixed.html', 
+                             transactions=recent_transactions, 
+                             balance=balance, 
+                             form=form,
+                             total_income=total_income,
+                             total_expenses=total_expenses,
+                             categories=categories,
+                             monthly_income=monthly_income,
+                             monthly_expenses=monthly_expenses,
+                             transaction_count=transaction_count,
+                             avg_transaction=avg_transaction,
+                             categories_data=categories_data,
+                             savings_rate=savings_rate,
+                             daily_average=daily_average,
+                             balance_trend=balance_trend)
+    except Exception as e:
+        flash(f'Error loading dashboard: {str(e)}', 'error')
+        # Fallback to simple dashboard if there's an error
+        return render_template('dashboard_simple.html', 
+                             transactions=[], 
+                             balance=0, 
+                             form=None,
+                             total_income=0,
+                             total_expenses=0,
+                             categories=[])
+
+@main.route('/analytics')
+@login_required
+def analytics():
+    """Financial Analytics page"""
+    try:
+        from datetime import datetime, timedelta
+        from sqlalchemy import func
+        
+        # Get all transactions for calculations
+        all_transactions = Transaction.query.filter_by(user_id=current_user.id).all()
+        
+        # Calculate totals
+        total_income = sum(t.amount for t in all_transactions if t.transaction_type == 'income')
+        total_expenses = sum(t.amount for t in all_transactions if t.transaction_type == 'expense')
+        balance = current_user.get_balance()
+        
+        # Calculate analytics data
+        now = datetime.now()
+        current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # Monthly data
+        monthly_transactions = Transaction.query.filter(
+            Transaction.user_id == current_user.id,
+            Transaction.date >= current_month_start
+        ).all()
+        
+        monthly_income = sum(t.amount for t in monthly_transactions if t.transaction_type == 'income')
+        monthly_expenses = sum(t.amount for t in monthly_transactions if t.transaction_type == 'expense')
+        
+        # Transaction trends
+        transaction_count = len(all_transactions)
+        days_with_data = max(1, (now - min([t.date for t in all_transactions] + [now])).days + 1) if all_transactions else 1
+        avg_transaction = round(transaction_count / days_with_data, 1) if transaction_count > 0 else 0
+        
+        # Categories data
+        categories_data = []
+        if all_transactions:
+            from collections import defaultdict
+            category_totals = defaultdict(lambda: {'total': 0, 'count': 0, 'name': 'Unknown'})
+            
+            for transaction in all_transactions:
+                if transaction.transaction_type == 'expense':
+                    cat_name = transaction.category.name if transaction.category else 'Other'
+                    category_totals[cat_name]['total'] += transaction.amount
+                    category_totals[cat_name]['count'] += 1
+                    category_totals[cat_name]['name'] = cat_name
+            
+            # Convert to list and sort by total
+            categories_data = sorted([
+                {'name': data['name'], 'total': data['total'], 'count': data['count']}
+                for data in category_totals.values()
+            ], key=lambda x: x['total'], reverse=True)
+        
+        # Quick insights
+        savings_rate = round(((monthly_income - monthly_expenses) / monthly_income * 100), 1) if monthly_income > 0 else 0
+        daily_average = monthly_expenses / max(1, now.day) if monthly_expenses > 0 else 0
+        balance_trend = 0  # Could be calculated based on historical data
+        
+        return render_template('analytics.html', 
+                             balance=balance,
+                             total_income=total_income,
+                             total_expenses=total_expenses,
+                             monthly_income=monthly_income,
+                             monthly_expenses=monthly_expenses,
+                             transaction_count=transaction_count,
+                             avg_transaction=avg_transaction,
+                             categories_data=categories_data,
+                             savings_rate=savings_rate,
+                             daily_average=daily_average,
+                             balance_trend=balance_trend)
+    except Exception as e:
+        flash(f'Error loading analytics: {str(e)}', 'error')
+        return redirect(url_for('main.dashboard'))
 
 @main.route('/add_transaction', methods=['POST'])
 @login_required
@@ -133,6 +365,37 @@ def stats():
     return render_template('stats.html', 
                          category_stats=category_stats,
                          monthly_stats=monthly_stats)
+
+@main.route('/transactions')
+@login_required
+def transactions():
+    """Transactions page with all user transactions"""
+    # Get all transactions for the user
+    transactions = Transaction.query.filter_by(user_id=current_user.id)\
+                                  .order_by(Transaction.date.desc())\
+                                  .all()
+    
+    # Get categories for the filter dropdown
+    categories = Category.query.all()
+    
+    # Calculate totals
+    total_income = sum(t.amount for t in transactions if t.transaction_type == 'income')
+    total_expenses = sum(t.amount for t in transactions if t.transaction_type == 'expense')
+    balance = total_income - total_expenses
+    
+    return render_template('transactions.html',
+                         transactions=transactions,
+                         categories=categories,
+                         total_income=total_income,
+                         total_expenses=total_expenses,
+                         balance=balance)
+
+@main.route('/settings')
+@login_required
+def settings():
+    """User settings page"""
+    categories = Category.query.all()
+    return render_template('settings.html', categories=categories)
 
 @main.route('/reports')
 @login_required
@@ -371,6 +634,33 @@ def categories():
     categories = Category.query.all()
     return render_template('categories.html', categories=categories)
 
+@main.route('/export_excel')
+@login_required
+def export_excel():
+    import io
+    from flask import send_file
+    from openpyxl import Workbook
+
+    transactions = Transaction.query.filter_by(user_id=current_user.id).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Transactions"
+    ws.append(['ID', 'Date', 'Category', 'Amount', 'Description'])
+
+    for t in transactions:
+        ws.append([
+            t.id,
+            t.date.strftime('%Y-%m-%d %H:%M'),
+            t.category.name if t.category else '',
+            t.amount,
+            t.description
+        ])
+
+    file_stream = io.BytesIO()
+    wb.save(file_stream)
+    file_stream.seek(0)
+    return send_file(file_stream, as_attachment=True, download_name='transactions.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
 @main.route('/categories/add', methods=['GET', 'POST'])
 @login_required
 def add_category():
@@ -427,16 +717,13 @@ def delete_category(category_id):
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     """Login"""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    
+    # Always allow access to login page, even if authenticated
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         
         if user and user.check_password(form.password.data):
             login_user(user)
-            flash('Welcome!', 'success')
             return redirect(url_for('main.dashboard'))
         else:
             flash('Invalid username or password', 'error')
@@ -446,9 +733,7 @@ def login():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     """Register new user"""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    
+    # Always allow access to register page
     form = RegisterForm()
     if form.validate_on_submit():
         # Check that user with this username or email doesn't exist
@@ -899,12 +1184,12 @@ def api_live_balance():
 @main.route('/sw.js')
 def service_worker():
     """Service Worker for PWA"""
-    sw_content = '''
-const CACHE_NAME = 'expense-tracker-v1';
+    sw_content = """
+const CACHE_NAME = 'finrelate-cache-v1';
 const urlsToCache = [
     '/',
     '/static/style.css',
-    '/custom-dashboard',
+    '/static/finrelate.css',
     '/dashboard',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
@@ -917,37 +1202,44 @@ self.addEventListener('install', function(event) {
                 return cache.addAll(urlsToCache);
             })
     );
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', function(event) {
+    event.waitUntil(
+        caches.keys().then(function(cacheNames) {
+            return Promise.all(
+                cacheNames.map(function(cacheName) {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    return self.clients.claim();
 });
 
 self.addEventListener('fetch', function(event) {
-    event.respondWith(
-        caches.match(event.request)
-            .then(function(response) {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            }
-        )
-    );
+    // Don't intercept requests to avoid redirect issues
+    return;
 });
 
 // Push notifications
 self.addEventListener('push', function(event) {
     const options = {
-        body: event.data ? event.data.text() : 'New expense tracker notification',
+        body: event.data ? event.data.text() : 'New FinRelate notification',
         icon: '/static/icon-192x192.png',
         badge: '/static/badge-72x72.png',
-        tag: 'expense-tracker',
+        tag: 'finrelate',
         requireInteraction: true
     };
 
     event.waitUntil(
-        self.registration.showNotification('Expense Tracker', options)
+        self.registration.showNotification('FinRelate', options)
     );
 });
-    '''
-    
+"""
     response = make_response(sw_content)
     response.headers['Content-Type'] = 'application/javascript'
     return response
@@ -971,31 +1263,8 @@ def manifest():
                 "sizes": "192x192",
                 "type": "image/svg+xml"
             }
-        ],
-        "categories": ["finance", "productivity"],
-        "screenshots": []
+        ]
     }
-    
     response = make_response(json.dumps(manifest_data))
     response.headers['Content-Type'] = 'application/json'
     return response
-
-
-@main.route('/offline')
-def offline():
-    """Offline page for PWA"""
-    return render_template('offline.html')
-
-
-# Error handlers
-@main.errorhandler(404)
-def page_not_found(error):
-    """Handle 404 errors"""
-    return render_template('errors/404.html'), 404
-
-
-@main.errorhandler(500)
-def internal_error(error):
-    """Handle 500 errors"""
-    db.session.rollback()
-    return render_template('errors/500.html'), 500

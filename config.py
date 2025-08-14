@@ -6,7 +6,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
     # Database configuration
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///expense_tracker.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///finrelate.db'
     
     # SQLAlchemy configuration
     SQLALCHEMY_TRACK_MODIFICATIONS = False

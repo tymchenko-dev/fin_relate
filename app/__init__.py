@@ -4,7 +4,7 @@ from flask_login import LoginManager
 import os
 from config import config
 
-# Инициализация расширений
+# Initialize extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
 

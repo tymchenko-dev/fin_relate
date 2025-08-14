@@ -1,309 +1,84 @@
-# 🤖 AI-Powered Expense Tracker
+# FinRelate
 
-A cutting-edge personal finance management application built with Flask, featuring AI-powered insights, PWA capabilities, and advanced analytics.
+![Dashboard Screenshot](img/FinRelate%20Dashboard.png)
+![Welcome Screenshot](img/FinRelate%20Logo.jpg)
 
-## 🌟 Features
+FinRelate is a modern, AI-powered personal finance management platform that helps you track expenses, manage budgets, analyze your financial data, and achieve your financial goals with ease. The project is currently under active development and will continue to be updated with new features and improvements.
 
-### Core Functionality
-- **💰 Transaction Management**: Add, edit, and categorize income and expenses
-- **📊 Dashboard**: Real-time financial overview with interactive charts
-- **🏷️ Categories**: Customizable expense categories with color coding
-- **📈 Statistics**: Detailed financial analytics and trends
+## Features
 
-### 🤖 AI-Powered Features
-- **Smart Budget Assistant**: Machine learning predictions for spending patterns
-- **Intelligent Recommendations**: AI-driven financial advice based on your habits
-- **Automatic Categorization**: Smart categorization of transactions
-- **Spending Pattern Analysis**: AI insights into your financial behavior
-- **Predictive Analytics**: Forecast future expenses and savings
+- **Smart Analytics**: Get detailed insights into your spending patterns with interactive charts and reports.
+- **Expense Tracking**: Add, edit, and delete transactions. Categorize your expenses and income for better management.
+- **Budget Goals**: Set and monitor budget goals for different categories.
+- **Achievements & Gamification**: Earn achievements for financial milestones and healthy habits.
+- **AI Recommendations**: Receive smart, AI-driven financial tips and insights.
+- **Data Export**: Export your transactions to CSV or Excel for further analysis.
+- **Receipt Scanner**: Scan receipts and automatically extract transaction data (mock AI demo).
+- **User Management**: Secure registration, login, and logout with password hashing.
+- **Dark/Light Theme**: Toggle between dark and light modes, with system preference detection.
+- **Mobile Friendly**: Responsive design for all devices.
+- **Production Ready**: Multi-environment configuration, PostgreSQL support, and deployment configs for Render/Railway.
 
-### 📱 Progressive Web App (PWA)
-- **Offline Support**: Full functionality without internet connection
-- **Camera Receipt Scanning**: Scan and process receipts with AI
-- **Push Notifications**: Smart alerts and reminders
-- **Mobile-First Design**: Responsive design optimized for all devices
-- **App Installation**: Install directly from browser to home screen
+## Screenshots
 
-### 📊 Advanced Dashboard
-- **Custom Widgets**: Drag-and-drop dashboard customization
-- **Real-time Charts**: Interactive visualizations with Chart.js
-- **Financial Insights**: AI-powered spending analysis
-- **Budget Goals**: Set and track financial objectives
-- **Achievement System**: Gamified financial milestones
+### Dashboard
+![Dashboard](img/FinRelate%20Dashboard.png)
 
-### 🎯 Smart Features
-- **Budget Goals**: AI-assisted budget planning and tracking
-- **Smart Notifications**: Contextual alerts based on spending patterns
-- **Achievement System**: Gamification with rewards and milestones
-- **Export Reports**: Generate detailed financial reports
-- **Data Visualization**: Advanced charts and graphs
+### Welcome Page
+![Welcome](img/FinRelate%20Logo.jpg)
 
-## 🚀 Quick Start
+### Contact Page
+![Contact](img/Footer.png)
 
-### Prerequisites
-- Python 3.8+
-- Flask
-- SQLAlchemy
+### Analytics
+![Analytics](img/Chart%20Cards.png)
 
-### Installation
+## Quick Start
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd expense_tracker
+   git clone https://github.com/your-username/finrelate.git
+   cd finrelate
    ```
-
-2. **Create virtual environment**
+2. **Install dependencies**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
    pip install -r requirements.txt
    ```
-
-4. **Initialize the database**
+3. **Create demo data**
    ```bash
-   python init_db.py
+   python create_demo_data.py
    ```
-
-5. **Run the application**
+4. **Run the application**
    ```bash
    python run.py
    ```
+5. **Open in your browser**
+   - http://127.0.0.1:5002
 
-6. **Access the app**
-   Open your browser and go to `http://localhost:5002`
+**Demo login:**
+- Username: `demo_user`
+- Password: `demo123`
 
-7. **Create demo data (Optional)**
-   - Register a new user account
-   - Use the application to add some transactions
-   - Or manually add demo transactions for portfolio showcase
+## Deployment
 
-### Demo Account Setup
-For portfolio demonstration, create an account and add sample transactions:
-- Monthly salary: $2500-3000
-- Regular expenses: food, transportation, shopping
-- Recurring bills: utilities, subscriptions
-- Entertainment: movies, dining out
+See [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment instructions (Render, Railway, manual, etc).
 
-## 📱 PWA Installation
+## Roadmap
+- [x] Core expense tracking and analytics
+- [x] Budget goals and achievements
+- [x] AI-powered recommendations (demo)
+- [x] Data export (CSV/Excel)
+- [x] Responsive UI and theming
+- [ ] Advanced AI insights
+- [ ] Multi-user collaboration
+- [ ] More integrations and automation
 
-### Desktop (Chrome/Edge)
-1. Visit the app in your browser
-2. Click the install icon in the address bar
-3. Follow the installation prompts
+## Status
 
-### Mobile (iOS/Android)
-1. Open the app in Safari/Chrome
-2. Tap "Add to Home Screen" from the share menu
-3. The app will be installed as a native-like app
+> **Note:** This project is a work in progress and will be updated regularly. Contributions and feedback are welcome!
 
-## 🤖 AI Features Setup
+## License
 
-### Mock AI (Default)
-The application comes with mock AI functions that simulate:
-- Spending pattern analysis
-- Smart recommendations
-- Predictive insights
-- Receipt processing
-
-### Real AI Integration (Optional)
-To enable real AI features, you can integrate:
-
-1. **OpenAI GPT** for natural language processing
-2. **TensorFlow/PyTorch** for custom ML models
-3. **Google Vision API** for receipt scanning
-4. **Custom algorithms** for financial analysis
-
-## 🎯 Usage Guide
-
-### Getting Started
-1. **Register** a new account or login
-2. **Add transactions** manually or scan receipts
-3. **Set budget goals** for different categories
-4. **Explore AI insights** for personalized recommendations
-
-### Dashboard Navigation
-- **📊 Dashboard**: Main financial overview
-- **💰 Transactions**: Add and manage transactions
-- **📈 Statistics**: Detailed analytics
-- **🎯 Budget Goals**: Set and track financial objectives
-- **🤖 AI Insights**: Smart recommendations and patterns
-- **📷 Receipt Scanner**: Camera-based receipt processing
-- **🏆 Achievements**: Track your financial milestones
-- **⚙️ Settings**: Customize categories and preferences
-
-### AI Features
-- **Smart Insights**: Get AI-powered spending analysis
-- **Budget Assistant**: Receive personalized budget recommendations
-- **Pattern Recognition**: Discover spending patterns and trends
-- **Predictive Analytics**: Forecast future financial scenarios
-
-## 🏗️ Architecture
-
-### Backend
-- **Flask**: Web framework
-- **SQLAlchemy**: Database ORM
-- **Flask-Login**: User authentication
-- **WTForms**: Form handling and validation
-
-### Frontend
-- **Bootstrap 5**: Responsive UI framework
-- **Chart.js**: Interactive data visualizations
-- **Font Awesome**: Icon library
-- **PWA**: Service worker for offline functionality
-
-### Database Schema
-- **Users**: User accounts and authentication
-- **Categories**: Expense/income categories
-- **Transactions**: Financial transactions
-- **Budget Goals**: AI-assisted budget planning
-- **Achievements**: Gamification system
-- **Smart Recommendations**: AI insights storage
-- **Receipt Scans**: Processed receipt data
-
-### AI/ML Components
-- **Pattern Analysis**: Spending behavior analysis
-- **Recommendation Engine**: Personalized financial advice
-- **Prediction Models**: Future spending forecasts
-- **Natural Language Processing**: Receipt text extraction
-
-## 🔧 Development
-
-### Project Structure
-```
-expense_tracker/
-├── app/
-│   ├── __init__.py          # App factory
-│   ├── models.py            # Database models
-│   ├── routes.py            # URL routes and views
-│   ├── forms.py             # WTForms definitions
-│   ├── static/              # CSS, JS, images
-│   └── templates/           # Jinja2 templates
-├── instance/                # Instance-specific config
-├── config.py               # Configuration settings
-├── run.py                  # Application entry point
-├── init_db.py              # Database initialization
-└── requirements.txt        # Python dependencies
-```
-
-### Adding New Features
-1. **Models**: Add new database models in `app/models.py`
-2. **Routes**: Create new routes in `app/routes.py`
-3. **Templates**: Add HTML templates in `app/templates/`
-4. **Static Files**: Add CSS/JS in `app/static/`
-
-### Database Migrations
-```bash
-# Initialize database
-python init_db.py
-
-# Reset database (WARNING: deletes all data)
-python init_db.py --reset
-```
-
-## 🌐 API Endpoints
-
-### Main Routes
-- `GET /` - Landing page
-- `GET /dashboard` - Main dashboard
-- `GET /transactions` - Transaction management
-- `GET /statistics` - Financial analytics
-
-### AI Features
-- `GET /smart-insights` - AI recommendations
-- `GET /budget-goals` - Budget management
-- `POST /api/ai/analyze` - Spending analysis
-- `POST /api/ai/recommend` - Get recommendations
-
-### PWA Endpoints
-- `GET /service-worker.js` - Service worker
-- `GET /manifest.json` - PWA manifest
-- `GET /offline` - Offline page
-
-## 🎨 Customization
-
-### Themes
-- Modify CSS variables in `app/static/css/`
-- Customize Bootstrap theme
-- Add custom color schemes
-
-### AI Models
-- Replace mock functions with real ML models
-- Integrate external AI services
-- Train custom models on user data
-
-### Dashboard Widgets
-- Create new widget types
-- Customize existing widgets
-- Add real-time data updates
-
-## 🚀 Deployment
-
-### Local Development
-```bash
-python run.py
-```
-
-### Production Deployment
-```bash
-# Using Gunicorn
-gunicorn -w 4 -b 0.0.0.0:5000 run:app
-
-# Using Docker (create Dockerfile)
-docker build -t expense-tracker .
-docker run -p 5000:5000 expense-tracker
-```
-
-### Environment Variables
-Create a `.env` file:
-```
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=sqlite:///expense_tracker.db
-FLASK_ENV=production
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-- 📧 Email: support@expense-tracker.com
-- 💬 Discord: [Join our community]
-- 📚 Documentation: [Full docs]
-- 🐛 Bug Reports: [GitHub Issues]
-
-## 🔮 Roadmap
-
-### Upcoming Features
-- [ ] Real-time collaboration
-- [ ] Bank account integration
-- [ ] Advanced ML models
-- [ ] Multi-currency support
-- [ ] Investment tracking
-- [ ] Tax report generation
-- [ ] Voice command interface
-- [ ] Blockchain integration
-
-### AI Enhancements
-- [ ] Advanced pattern recognition
-- [ ] Predictive cashflow modeling
-- [ ] Automated bill detection
-- [ ] Smart savings recommendations
-- [ ] Financial goal optimization
-
----
-
-Built with ❤️ using Flask, AI, and modern web technologies.
+MIT License

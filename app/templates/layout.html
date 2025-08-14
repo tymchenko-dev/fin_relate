@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Expense Tracker - Simple and convenient tool for personal finance management">
-    <meta name="keywords" content="expense tracker, finance, budget, money management">
-    <meta name="author" content="Expense Tracker">
+    <meta name="description" content="FinRelate - Simple and convenient tool for personal finance management">
+    <meta name="keywords" content="finrelate, finance, budget, money management, expense tracker">
+    <meta name="author" content="FinRelate">
     
     <!-- Favicon for better browser support -->
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>�</text></svg>">
     
-    <title>{% block title %}Expense Tracker{% endblock %}</title>
+    <title>{% block title %}FinRelate{% endblock %}</title>
     
     <!-- Bootstrap CSS with integrity check -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
@@ -33,78 +33,26 @@
     
     <!-- Custom styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='finrelate.css') }}?v=20250810-3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}?v=20250808-3">
     
     <!-- Additional meta tags for better mobile experience -->
-    <meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#7AC3AA">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Expense Tracker">
+    <meta name="apple-mobile-web-app-title" content="FinRelate">
     
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    
-    <!-- Loading styles -->
-    <style>
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        
-        .loading-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9998;
-        }
-    </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <!-- Loading overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="text-center">
-            <div class="loading-spinner mb-3"></div>
-            <div class="fw-bold text-primary">Loading...</div>
-        </div>
-    </div>
-    
-    <!-- Toast notifications container -->
-    <div class="toast-container"></div>
     <!-- Navigation bar with enhanced mobile support -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}" aria-label="Expense Tracker Home">
-                <i class="fas fa-wallet me-2" aria-hidden="true"></i>Expense Tracker
+            <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}" aria-label="FinRelate Home">
+                <img src="{{ url_for('static', filename='Logotip.png') }}" alt="FinRelate Logo" style="width: 32px; height: 32px; margin-right: 8px;">
+                FinRelate
             </a>
             
             <!-- Mobile toggle button with accessibility -->
@@ -128,64 +76,10 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.custom_dashboard') }}" aria-label="Custom Dashboard">
-                                <i class="fas fa-th-large me-1" aria-hidden="true"></i>
-                                <span class="d-lg-inline">Custom</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.achievements') }}" aria-label="Achievements">
-                                <i class="fas fa-trophy me-1" aria-hidden="true"></i>
-                                <span class="d-lg-inline">Achievements</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.stats') }}" aria-label="Statistics">
                                 <i class="fas fa-chart-bar me-1" aria-hidden="true"></i>
                                 <span class="d-lg-inline">Statistics</span>
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.reports') }}" aria-label="Reports">
-                                <i class="fas fa-chart-line me-1" aria-hidden="true"></i>
-                                <span class="d-lg-inline">Reports</span>
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="aiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-brain me-1" aria-hidden="true"></i>
-                                <span class="d-lg-inline">AI Tools</span>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="aiDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.smart_insights') }}">
-                                    <i class="fas fa-lightbulb me-2"></i>Smart Insights
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.budget_goals') }}">
-                                    <i class="fas fa-bullseye me-2"></i>Budget Goals
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.receipt_scanner') }}">
-                                    <i class="fas fa-camera me-2"></i>Receipt Scanner
-                                </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="{{ url_for('main.notifications') }}" aria-label="Notifications">
-                                <i class="fas fa-bell me-1" aria-hidden="true"></i>
-                                <span class="d-lg-inline">Alerts</span>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                    3
-                                    <span class="visually-hidden">unread notifications</span>
-                                </span>
-                            </a>
-                        </li>
-                        <!-- Theme toggle button -->
-                        <li class="nav-item">
-                            <button class="nav-link btn btn-link border-0" 
-                                    id="theme-toggle" 
-                                    aria-label="Toggle dark mode"
-                                    title="Toggle dark/light theme">
-                                <i class="fas fa-moon" id="theme-icon" aria-hidden="true"></i>
-                            </button>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" 
@@ -204,11 +98,6 @@
                                         <i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i>Dashboard
                                     </a>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('main.categories') }}" aria-label="Manage categories">
-                                        <i class="fas fa-tags me-2" aria-hidden="true"></i>Categories
-                                    </a>
-                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item" href="{{ url_for('auth.logout') }}" aria-label="Logout from account">
@@ -218,15 +107,6 @@
                             </ul>
                         </li>
                     {% else %}
-                        <!-- Theme toggle for non-authenticated users -->
-                        <li class="nav-item">
-                            <button class="nav-link btn btn-link border-0" 
-                                    id="theme-toggle-guest" 
-                                    aria-label="Toggle dark mode"
-                                    title="Toggle dark/light theme">
-                                <i class="fas fa-moon" id="theme-icon-guest" aria-hidden="true"></i>
-                            </button>
-                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.login') }}" aria-label="Login">
                                 <i class="fas fa-sign-in-alt me-1" aria-hidden="true"></i>
@@ -266,307 +146,12 @@
     </div>
 
     <!-- Main content with proper ARIA landmarks -->
-    <main class="container-fluid mt-4 flex-grow-1" role="main">
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer with social links and accessibility -->
-    <footer class="bg-light text-center text-muted py-3 mt-auto" role="contentinfo">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <p class="mb-1">&copy; 2025 Expense Tracker. Manage your finances easily!</p>
-                    <small class="text-muted">
-                        <a href="#" class="text-muted text-decoration-none me-3" aria-label="Privacy Policy">Privacy</a>
-                        <a href="#" class="text-muted text-decoration-none me-3" aria-label="Terms of Service">Terms</a>
-                        <a href="#" class="text-muted text-decoration-none" aria-label="Support">Support</a>
-                    </small>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS Bundle with enhanced error handling -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" 
-            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" 
-            crossorigin="anonymous"
-            onerror="console.error('Failed to load Bootstrap JS')"></script>
-    
-    <!-- Service Worker for offline support (optional) -->
-    <script>
-        // Basic service worker registration for PWA capabilities
-        // TEMPORARILY DISABLED to fix login redirect issues
-        /*
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('SW registered: ', registration);
-                }).catch(function(registrationError) {
-                    console.log('SW registration failed: ', registrationError);
-                });
-            });
-        }
-        */
-        
-        // Enhanced error handling
-        window.addEventListener('error', function(e) {
-            console.error('JavaScript error:', e.error);
-        });
-        
-        // Performance monitoring
-        window.addEventListener('load', function() {
-            if ('performance' in window) {
-                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-                console.log('Page load time:', loadTime + 'ms');
-            }
-        });
-    </script>
-    
-    <!-- Dark Theme Support -->
-    <style>
-        [data-bs-theme="dark"] {
-            --bs-body-bg: #212529;
-            --bs-body-color: #dee2e6;
-        }
-        
-        [data-bs-theme="dark"] .navbar {
-            background-color: #1a1d20 !important;
-        }
-        
-        [data-bs-theme="dark"] .card {
-            background-color: #2d3338;
-            border-color: #495057;
-        }
-        
-        [data-bs-theme="dark"] .btn-primary {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-        
-        [data-bs-theme="dark"] .table {
-            --bs-table-bg: transparent;
-            color: #dee2e6;
-        }
-        
-        [data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        
-        [data-bs-theme="dark"] .bg-light {
-            background-color: #343a40 !important;
-        }
-        
-        [data-bs-theme="dark"] .text-muted {
-            color: #adb5bd !important;
-        }
-        
-        /* Theme toggle button styling */
-        #theme-toggle, #theme-toggle-guest {
-            color: rgba(255, 255, 255, 0.75);
-            background: none;
-            padding: 0.5rem 0.75rem;
-        }
-        
-        #theme-toggle:hover, #theme-toggle-guest:hover {
-            color: rgba(255, 255, 255, 1);
-        }
-        
-        [data-bs-theme="dark"] #theme-toggle, 
-        [data-bs-theme="dark"] #theme-toggle-guest {
-            color: rgba(255, 255, 255, 0.75);
-        }
-    </style>
-    
-    <!-- Theme Toggle Script -->
-    <script>
-        // Theme management
-        const getStoredTheme = () => localStorage.getItem('theme');
-        const setStoredTheme = theme => localStorage.setItem('theme', theme);
-        
-        const getPreferredTheme = () => {
-            const storedTheme = getStoredTheme();
-            if (storedTheme) {
-                return storedTheme;
-            }
-            
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        };
-        
-        const setTheme = theme => {
-            if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-bs-theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-bs-theme', theme);
-            }
-            
-            // Update icons for both authenticated and guest users
-            const updateIcon = (iconId) => {
-                const icon = document.getElementById(iconId);
-                if (icon) {
-                    if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                        icon.className = 'fas fa-sun';
-                    } else {
-                        icon.className = 'fas fa-moon';
-                    }
-                }
-            };
-            
-            updateIcon('theme-icon');
-            updateIcon('theme-icon-guest');
-        };
-        
-        // Set initial theme
-        setTheme(getPreferredTheme());
-        
-        // Listen for system theme changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            const storedTheme = getStoredTheme();
-            if (storedTheme !== 'light' && storedTheme !== 'dark') {
-                setTheme(getPreferredTheme());
-            }
-        });
-        
-        // Theme toggle functionality
-        const setupThemeToggle = (buttonId) => {
-            const themeToggle = document.getElementById(buttonId);
-            if (themeToggle) {
-                themeToggle.addEventListener('click', () => {
-                    const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                    setStoredTheme(newTheme);
-                    setTheme(newTheme);
-                });
-            }
-        };
-        
-        // Setup theme toggles for both authenticated and guest users
-        document.addEventListener('DOMContentLoaded', () => {
-            setupThemeToggle('theme-toggle');
-            setupThemeToggle('theme-toggle-guest');
-        });
-    </script>
-    
-    <script>
-        // Loading states management
-        class LoadingManager {
-            constructor() {
-                this.overlay = document.getElementById('loadingOverlay');
-                this.init();
-            }
-            
-            init() {
-                // Show loading on form submissions (except export forms)
-                document.addEventListener('submit', (e) => {
-                    if (e.target.tagName === 'FORM' && 
-                        !e.target.action.includes('export') &&
-                        !e.target.action.includes('export_transactions')) {
-                        this.show();
-                    }
-                });
-                
-                // Show loading on navigation
-                document.addEventListener('click', (e) => {
-                    const link = e.target.closest('a[href]');
-                    
-                    // Don't show loading for any links if we can't determine safely
-                    if (!link) return;
-                    
-                    // Skip loading for ALL dropdown menu items to be safe
-                    if (link.closest('.dropdown-menu')) return;
-                    
-                    // Skip loading for export/download links
-                    if (link.classList.contains('no-loading') || 
-                        link.href.includes('/export') ||
-                        link.href.includes('export_transactions') ||
-                        link.closest('.btn-group')) {
-                        return;
-                    }
-                    
-                    // Skip loading for dropdown toggles
-                    if (link.classList.contains('dropdown-toggle')) return;
-                    
-                    // Skip loading for anchor links
-                    if (link.href.includes('#')) return;
-                    
-                    // Skip loading for links with target (new window)
-                    if (link.target) return;
-                    
-                    // Show loading for remaining navigation links
-                    this.show();
-                });
-                
-                // Hide loading when page loads
-                window.addEventListener('load', () => {
-                    this.hide();
-                });
-                
-                // Hide loading on DOMContentLoaded as fallback
-                document.addEventListener('DOMContentLoaded', () => {
-                    setTimeout(() => this.hide(), 100);
-                });
-            }
-            
-            show() {
-                if (this.overlay) {
-                    this.overlay.classList.add('show');
-                }
-            }
-            
-            hide() {
-                if (this.overlay) {
-                    this.overlay.classList.remove('show');
-                }
-            }
-        }
-        
-        // Toast notifications
-        class ToastManager {
-            constructor() {
-                this.container = document.querySelector('.toast-container');
-            }
-            
-            show(message, type = 'info') {
-                const toast = document.createElement('div');
-                toast.className = `toast align-items-center text-bg-${type} border-0`;
-                toast.setAttribute('role', 'alert');
-                toast.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                `;
-                
-                this.container.appendChild(toast);
-                const bsToast = new bootstrap.Toast(toast);
-                bsToast.show();
-                
-                // Remove from DOM after hiding
-                toast.addEventListener('hidden.bs.toast', () => {
-                    toast.remove();
-                });
-            }
-        }
-        
-        // Initialize managers
-        const loadingManager = new LoadingManager();
-        const toastManager = new ToastManager();
-        
-        // Global functions for use in other scripts
-        window.showLoading = () => loadingManager.show();
-        window.hideLoading = () => loadingManager.hide();
-        window.showToast = (message, type) => toastManager.show(message, type);
-        
-        // Handle flash messages
-        {% if get_flashed_messages() %}
-            document.addEventListener('DOMContentLoaded', () => {
-                {% for category, message in get_flashed_messages(with_categories=true) %}
-                    showToast('{{ message }}', '{{ "danger" if category == "error" else category }}');
-                {% endfor %}
-            });
-        {% endif %}
-    </script>
-    
-    <!-- Additional scripts -->
+    <div class="dashboard-layout d-flex flex-column min-vh-100" style="width: 100%;">
+        <main class="container-fluid mt-4 flex-grow-1" role="main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

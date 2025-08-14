@@ -1,0 +1,728 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - FinRelate{% endblock %}
+
+{% block content %}
+<style>
+    .navbar { display: none !important; }
+    .container-fluid .alert { display: none !important; }
+    main.container-fluid { padding: 0 !important; margin: 0 !important; }
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        background: linear-gradient(180deg, #2C5282 0%, #7AC3AA 100%) !important;
+    }
+    .dashboard-layout {
+        /* remove flex and min-height so the footer matches layout */
+    }
+</style>
+
+<!-- Dashboard Layout with Sidebar -->
+<div class="dashboard-layout">
+    <!-- Modern Sidebar -->
+        <!-- Fixed Sidebar Toggle Button -->
+    <button class="fixed-sidebar-toggle" id="fixedSidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Modern Sidebar -->
+    <div class="modern-sidebar" id="modernSidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('main.index') }}" class="sidebar-brand" title="Go to Homepage">
+                <img src="{{ url_for('static', filename='new-logo.png') }}" alt="FinRelate Logo" class="sidebar-logo">
+                <span class="brand-text">FinRelate</span>
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('main.dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.stats') }}">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.analytics') }}">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Financial Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.categories') }}">
+                        <i class="fas fa-tags"></i>
+                        <span>Categories</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.budget_goals') }}">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Budget Goals</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.achievements') }}">
+                        <i class="fas fa-trophy"></i>
+                        <span>Achievements</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.notifications') }}">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.settings') }}">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.receipt_scanner') }}">
+                        <i class="fas fa-camera"></i>
+                        <span>Receipt Scanner</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.smart_insights') }}">
+                        <i class="fas fa-brain"></i>
+                        <span>Smart Insights</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile-sidebar">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ current_user.username }}</span>
+                    <small class="user-status">Online</small>
+                </div>
+                <div class="user-actions">
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="dashboard-container">
+    <!-- Modern Dashboard Header -->
+    <div class="modern-dashboard-header">
+        <div class="container-fluid">
+            <div class="row align-items-center py-4">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <!-- Sidebar toggle button for all screens -->
+                        <button class="sidebar-toggle-btn me-3" id="sidebarToggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="welcome-section">
+                            <h1 class="welcome-title">
+                                <span class="greeting">Hello,</span>
+                                <span class="username">{{ current_user.username }}</span>
+                            </h1>
+                            <p class="welcome-subtitle">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Today is {{ moment().format('dddd, MMMM Do YYYY') if moment else 'August 8, 2025' }}
+                            </p>
+                            <div class="quick-stats">{
+                                <div class="stat-item">
+                                    <span class="stat-value">${{ "%.0f"|format((total_income or 0) - (total_expenses or 0)) }}</span>
+                                    <span class="stat-label">Net Worth</span>
+                                </div>
+                                <div class="stat-divider"></div>
+                                <div class="stat-item">
+                                    <span class="stat-value">{{ transactions|length if transactions else 0 }}</span>
+                                    <span class="stat-label">Transactions</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="header-actions">
+                        <div class="action-buttons">
+                            <button class="btn btn-outline-light btn-sm me-2" data-bs-toggle="modal" data-bs-target="#analyticsModal">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Analytics
+                            </button>
+                            <button class="btn btn-primary-gradient" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+                                <i class="fas fa-plus me-2"></i>
+                                Add Transaction
+                            </button>
+                        </div>
+                        <div class="user-profile">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="profile-info">
+                                <div class="profile-name">{{ current_user.username }}</div>
+                                <div class="profile-status">
+                                    <i class="fas fa-circle online-indicator"></i>
+                                    Online
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Overview Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="overview-card">
+                <div class="card-content">
+                    <div class="card-header-info">
+                        <h6 class="card-subtitle">Net Worth</h6>
+                        <div class="card-value">${{ "%.2f"|format((total_income or 0) - (total_expenses or 0)) }}</div>
+                        <div class="card-change positive">
+                            <i class="fas fa-arrow-up"></i>+1.2%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="overview-card">
+                <div class="card-content">
+                    <div class="card-header-info">
+                        <h6 class="card-subtitle">Income</h6>
+                        <div class="card-value">${{ "%.2f"|format(total_income or 0) }}</div>
+                        <div class="card-change negative">
+                            <i class="fas fa-arrow-down"></i>-0.5%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="overview-card">
+                <div class="card-content">
+                    <div class="card-header-info">
+                        <h6 class="card-subtitle">Expenses</h6>
+                        <div class="card-value">${{ "%.2f"|format(total_expenses or 0) }}</div>
+                        <div class="card-change positive">
+                            <i class="fas fa-arrow-up"></i>+0.8%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Progress and Recent Transactions Row -->
+    <div class="row g-4 mb-5">
+        <!-- Budget Progress -->
+        <div class="col-md-6">
+            <div class="budget-card">
+                <div class="budget-header">
+                    <h5 class="budget-title">Budget Progress</h5>
+                </div>
+                <div class="budget-content">
+                    <div class="budget-item">
+                        <div class="budget-info">
+                            <span class="budget-category">Food & Dining</span>
+                            <span class="budget-amount">$425 / $600</span>
+                        </div>
+                        <div class="progress budget-progress">
+                            <div class="progress-bar" style="width: 71%"></div>
+                        </div>
+                    </div>
+                    <div class="budget-item">
+                        <div class="budget-info">
+                            <span class="budget-category">Transportation</span>
+                            <span class="budget-amount">$180 / $300</span>
+                        </div>
+                        <div class="progress budget-progress">
+                            <div class="progress-bar" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="budget-item">
+                        <div class="budget-info">
+                            <span class="budget-category">Entertainment</span>
+                            <span class="budget-amount">$95 / $150</span>
+                        </div>
+                        <div class="progress budget-progress">
+                            <div class="progress-bar" style="width: 63%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI Insights -->
+        <div class="col-md-6">
+            <div class="insights-card">
+                <div class="insights-header">
+                    <h5 class="insights-title">
+                        <i class="fas fa-robot me-2"></i>AI Insights
+                    </h5>
+                </div>
+                <div class="insights-content">
+                    <div class="insight-item">
+                        <i class="fas fa-lightbulb insight-icon"></i>
+                        <div class="insight-text">
+                            <strong>Saving Opportunity:</strong>
+                            You could save $200/month by reducing dining out expenses.
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <i class="fas fa-chart-line insight-icon"></i>
+                        <div class="insight-text">
+                            <strong>Spending Pattern:</strong>
+                            Your transportation costs increased 15% this month.
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <i class="fas fa-target insight-icon"></i>
+                        <div class="insight-text">
+                            <strong>Budget Goal:</strong>
+                            You're on track to meet 85% of your savings goal this month.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="transactions-card">
+                <div class="transactions-header">
+                    <h5 class="transactions-title">Recent Transactions</h5>
+                    <a href="/transactions" class="btn btn-outline-primary btn-sm">View All</a>
+                </div>
+                <div class="transactions-content">
+                    {% if transactions %}
+                        {% for transaction in transactions %}
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-details">
+                                    <span class="transaction-description">{{ transaction.description or 'N/A' }}</span>
+                                    <small class="transaction-category">{{ transaction.category.name if transaction.category else 'N/A' }}</small>
+                                </div>
+                                <div class="transaction-date">{{ transaction.date.strftime('%b %d') if transaction.date else 'N/A' }}</div>
+                            </div>
+                            <div class="transaction-amount {% if transaction.transaction_type == 'income' %}positive{% else %}negative{% endif %}">
+                                {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %} ${{ "%.2f"|format(transaction.amount or 0) }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-transactions">
+                            <i class="fas fa-receipt"></i>
+                            <p>No transactions yet. Start by adding your first transaction!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    </div> <!-- End main-content -->
+
+    <footer class="modern-footer" style="background: linear-gradient(135deg, #1A365D 0%, #68B39A 100%) !important; color: #fff !important; border-top: 1px solid rgba(122,195,170,0.18); box-shadow: 0 -4px 24px rgba(122,195,170,0.12); border-radius: 0 0 24px 24px;">
+        <div class="container py-4">
+            <div class="row align-items-center mb-3">
+                <div class="col-md-3 d-flex align-items-center gap-2">
+                    <img src="{{ url_for('static', filename='new-logo.png') }}" alt="FinRelate Logo" style="width: 32px; height: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(122,195,170,0.18);">
+                    <span style="font-size: 1.1rem; font-weight: 700; color: #A3E9D3; text-shadow: 0 2px 8px rgba(122,195,170,0.18);">FinRelate</span>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center gap-2">
+                    <a href="/" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Home</a>
+                    <a href="/privacy-policy" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Privacy Policy</a>
+                    <a href="/terms" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Terms</a>
+                    <a href="/contact" class="footer-nav-link" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 24px; padding: 4px 12px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: background 0.2s;">Contact</a>
+                </div>
+                <div class="col-md-3 d-flex align-items-center justify-content-end gap-2">
+                    <a href="https://www.linkedin.com/in/vladyslav-tymchenko-6686bb311/" class="footer-social-link" aria-label="LinkedIn" target="_blank" rel="noopener" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background 0.2s, color 0.2s;"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://github.com/tymchenko-dev" class="footer-social-link" aria-label="GitHub" target="_blank" rel="noopener" style="color: #fff; background: rgba(255,255,255,0.12); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background 0.2s, color 0.2s;"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.12);">
+            <div class="row">
+                <div class="col-md-8 d-flex align-items-center">
+                    <span style="font-size: 1rem; color: #fff; opacity: 0.92;">© 2024 FinRelate. All rights reserved.</span>
+                </div>
+                <div class="col-md-4 d-flex align-items-center justify-content-end">
+                    <span style="font-size: 1rem; color: #fff; opacity: 0.92; white-space: nowrap;"><i class="fas fa-robot me-2" style="font-size: 1rem;"></i> Data-driven financial insights powered by AI.</span>
+                </div>
+            </div>
+        </div>
+        <style>
+            .footer-nav-link:hover {
+                background: rgba(255,255,255,0.22) !important;
+                color: #A3E9D3 !important;
+            }
+            .footer-social-link:hover {
+                background: #A3E9D3 !important;
+                color: #1A365D !important;
+            }
+            .footer-social-link i,
+            .footer-social-link {
+                text-decoration: none !important;
+                border-bottom: none !important;
+            }
+        </style>
+    </footer>
+</div> <!-- End dashboard-layout -->
+
+<!-- Analytics Modal -->
+<div class="modal fade" id="analyticsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-line text-primary me-2"></i>Financial Analytics
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <!-- Monthly Overview -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="d-flex align-items-center justify-content-center mb-3">
+                                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                        <i class="fas fa-calendar-month text-primary fa-lg"></i>
+                                    </div>
+                                </div>
+                                <h6 class="card-title">This Month</h6>
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="border-end">
+                                            <h5 class="text-success mb-1">${{ "%.2f"|format(monthly_income or 0) }}</h5>
+                                            <small class="text-muted">Income</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h5 class="text-danger mb-1">${{ "%.2f"|format(monthly_expenses or 0) }}</h5>
+                                        <small class="text-muted">Expenses</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transaction Trends -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="d-flex align-items-center justify-content-center mb-3">
+                                    <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                        <i class="fas fa-trending-up text-success fa-lg"></i>
+                                    </div>
+                                </div>
+                                <h6 class="card-title">Transaction Trends</h6>
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="border-end">
+                                            <h5 class="text-primary mb-1">{{ transaction_count or 0 }}</h5>
+                                            <small class="text-muted">Total</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h5 class="text-info mb-1">{{ avg_transaction or 0 }}</h5>
+                                        <small class="text-muted">Avg/Day</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Categories -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-list text-warning me-2"></i>Top Spending Categories
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                {% if categories_data %}
+                                    {% for category in categories_data[:5] %}
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
+                                                <i class="fas fa-tag text-warning"></i>
+                                            </div>
+                                            <span class="fw-medium">{{ category.name }}</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold text-danger">${{ "%.2f"|format(category.total) }}</div>
+                                            <small class="text-muted">{{ category.count }} transactions</small>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fas fa-chart-pie fa-2x mb-3 d-block"></i>
+                                        No category data available yet.<br>
+                                        Add some transactions to see your spending patterns!
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Insights -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-lightbulb text-info me-2"></i>Quick Insights
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <div class="bg-info bg-opacity-10 p-3 rounded-circle d-inline-flex mb-2">
+                                                <i class="fas fa-piggy-bank text-info"></i>
+                                            </div>
+                                            <p class="small text-muted mb-1">Savings Rate</p>
+                                            <h6 class="text-info">{{ savings_rate or 0 }}%</h6>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle d-inline-flex mb-2">
+                                                <i class="fas fa-wallet text-warning"></i>
+                                            </div>
+                                            <p class="small text-muted mb-1">Daily Average</p>
+                                            <h6 class="text-warning">${{ "%.2f"|format(daily_average or 0) }}</h6>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-flex mb-2">
+                                                <i class="fas fa-chart-line text-success"></i>
+                                            </div>
+                                            <p class="small text-muted mb-1">Balance Trend</p>
+                                            <h6 class="text-{{ 'success' if balance_trend and balance_trend > 0 else 'danger' }}">
+                                                {% if balance_trend and balance_trend > 0 %}↗{% else %}↘{% endif %} {{ "%.1f"|format(balance_trend or 0) }}%
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="alert('Full analytics feature coming soon!')">
+                    <i class="fas fa-external-link-alt me-2"></i>Detailed Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div class="modal fade" id="addTransactionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.add_transaction') }}">
+                <div class="modal-body">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control") }}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.amount.label(class="form-label") }}
+                                {{ form.amount(class="form-control", step="0.01") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.transaction_type.label(class="form-label") }}
+                                {{ form.transaction_type(class="form-select") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.category_id.label(class="form-label") }}
+                                {{ form.category_id(class="form-select") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.date.label(class="form-label") }}
+                                {{ form.date(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default in the modal form
+    const dateInput = document.getElementById('date');
+    if (dateInput && !dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+    
+    // Mobile sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const fixedSidebarToggle = document.getElementById('fixedSidebarToggle');
+    const sidebar = document.querySelector('.modern-sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const overlay = document.createElement('div');
+    
+    if ((sidebarToggle || fixedSidebarToggle) && sidebar && mainContent) {
+        // Create overlay for mobile
+        overlay.className = 'sidebar-overlay d-md-none';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        `;
+        document.body.appendChild(overlay);
+        
+        // Toggle sidebar function
+        function toggleSidebar() {
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                // Show sidebar
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+                document.body.classList.remove('sidebar-collapsed');
+                document.body.classList.add('sidebar-open');
+                
+                // Change icon to bars for both buttons
+                if (sidebarToggle) {
+                    const icon = sidebarToggle.querySelector('i');
+                    icon.className = 'fas fa-bars';
+                }
+                if (fixedSidebarToggle) {
+                    const fixedIcon = fixedSidebarToggle.querySelector('i');
+                    fixedIcon.className = 'fas fa-times';
+                }
+            } else {
+                // Hide sidebar
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+                document.body.classList.add('sidebar-collapsed');
+                document.body.classList.remove('sidebar-open');
+                
+                // Change icon to arrow right for original, bars for fixed
+                if (sidebarToggle) {
+                    const icon = sidebarToggle.querySelector('i');
+                    icon.className = 'fas fa-arrow-right';
+                }
+                if (fixedSidebarToggle) {
+                    const fixedIcon = fixedSidebarToggle.querySelector('i');
+                    fixedIcon.className = 'fas fa-bars';
+                }
+            }
+            
+            // Mobile overlay logic
+            if (window.innerWidth < 768) {
+                overlay.style.display = isCollapsed ? 'none' : 'block';
+            }
+        }
+        
+        // Add event listeners to both buttons
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', toggleSidebar);
+        }
+        if (fixedSidebarToggle) {
+            fixedSidebarToggle.addEventListener('click', toggleSidebar);
+        }
+        
+        // Mobile overlay click handler
+        overlay.addEventListener('click', function() {
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+                overlay.style.display = 'none';
+                
+                const icon = sidebarToggle.querySelector('i');
+                icon.className = 'fas fa-arrow-right';
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                overlay.style.display = 'none';
+            }
+        });
+    }
+    
+    // Modal positioning fix
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fix modal positioning when shown
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(function(modal) {
+            modal.addEventListener('show.bs.modal', function() {
+                // Force reset positioning
+                setTimeout(() => {
+                    const modalDialog = modal.querySelector('.modal-dialog');
+                    if (modalDialog) {
+                        modalDialog.style.marginLeft = 'auto';
+                        modalDialog.style.marginRight = 'auto';
+                        modalDialog.style.transform = 'none';
+                        modalDialog.style.left = '0';
+                        modalDialog.style.right = '0';
+                    }
+                }, 10);
+            });
+        });
+    });
+});
+
+</script>
+{% endblock %}
